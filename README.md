@@ -1,2 +1,2 @@
-# RsiDca
+# RsiDcaStrategy
 RsiDca long&amp;short strategy
