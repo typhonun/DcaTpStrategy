@@ -1,0 +1,121 @@
+1.
+2025-05-28 20:45:43 2025-05-28 12:45:43,869 - freqtrade - ERROR - Fatal exception!
+2025-05-28 20:45:43 Traceback (most recent call last):
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/main.py", line 47, in main
+2025-05-28 20:45:43     return_code = args["func"](args)
+2025-05-28 20:45:43                   ^^^^^^^^^^^^^^^^^^
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/commands/trade_commands.py", line 25, in start_trading
+2025-05-28 20:45:43     worker.run()
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/worker.py", line 79, in run
+2025-05-28 20:45:43     state = self._worker(old_state=state)
+2025-05-28 20:45:43             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/worker.py", line 124, in _worker
+2025-05-28 20:45:43     self._throttle(
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/worker.py", line 165, in _throttle
+2025-05-28 20:45:43     result = func(*args, **kwargs)
+2025-05-28 20:45:43              ^^^^^^^^^^^^^^^^^^^^^
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/worker.py", line 199, in _process_running
+2025-05-28 20:45:43     self.freqtrade.process()
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/freqtradebot.py", line 301, in process
+2025-05-28 20:45:43     self.process_open_trade_positions()
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/freqtradebot.py", line 743, in process_open_trade_positions
+2025-05-28 20:45:43     self.check_and_call_adjust_trade_position(trade)
+2025-05-28 20:45:43   File "/freqtrade/freqtrade/freqtradebot.py", line 786, in check_and_call_adjust_trade_position
+2025-05-28 20:45:43     if stake_amount is not None and stake_amount > 0.0:
+2025-05-28 20:45:43                                     ^^^^^^^^^^^^^^^^^^
+2025-05-28 20:45:43 TypeError: '>' not supported between instances of 'list' and 'float'
+
+2.
+freqtrade-long   | 2025-05-31 10:30:14,644 - freqtrade - ERROR - Fatal exception!
+freqtrade-long   | Traceback (most recent call last):
+freqtrade-long   |   File "/freqtrade/freqtrade/main.py", line 47, in main
+freqtrade-long   |     return_code = args["func"](args)
+freqtrade-long   |                   ^^^^^^^^^^^^^^^^^^
+freqtrade-long   |   File "/freqtrade/freqtrade/commands/trade_commands.py", line 25, in start_trading
+freqtrade-long   |     worker.run()
+freqtrade-long   |   File "/freqtrade/freqtrade/worker.py", line 79, in run
+freqtrade-long   |     state = self._worker(old_state=state)
+freqtrade-long   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+freqtrade-long   |   File "/freqtrade/freqtrade/worker.py", line 124, in _worker
+freqtrade-long   |     self._throttle(
+freqtrade-long   |   File "/freqtrade/freqtrade/worker.py", line 165, in _throttle
+freqtrade-long   |     result = func(*args, **kwargs)
+freqtrade-long   |              ^^^^^^^^^^^^^^^^^^^^^
+freqtrade-long   |   File "/freqtrade/freqtrade/worker.py", line 199, in _process_running
+freqtrade-long   |     self.freqtrade.process()
+freqtrade-long   |   File "/freqtrade/freqtrade/freqtradebot.py", line 301, in process
+freqtrade-long   |     self.process_open_trade_positions()
+freqtrade-long   |   File "/freqtrade/freqtrade/freqtradebot.py", line 743, in process_open_trade_positions
+freqtrade-long   |     self.check_and_call_adjust_trade_position(trade)
+freqtrade-long   |   File "/freqtrade/freqtrade/freqtradebot.py", line 786, in check_and_call_adjust_trade_position
+freqtrade-long   |     if stake_amount is not None and stake_amount > 0.0:
+freqtrade-long   |                                     ^^^^^^^^^^^^^^^^^^
+freqtrade-long   | TypeError: '>' not supported between instances of 'dict' and 'float'
+
+3.
+2025-05-29 01:23:55 2025-05-28 17:23:55,185 - freqtrade.exchange.exchange - ERROR - Could not load markets.
+2025-05-29 01:23:55 Traceback (most recent call last):
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 212, in fetch
+2025-05-29 01:23:55     async with session_method(yarl.URL(url, encoded=True),
+2025-05-29 01:23:55                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/aiohttp/client.py", line 1197, in __aenter__
+2025-05-29 01:23:55     self._resp = await self._coro
+2025-05-29 01:23:55                  ^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/aiohttp/client.py", line 608, in _request
+2025-05-29 01:23:55     await resp.start(conn)
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/aiohttp/client_reqrep.py", line 976, in start
+2025-05-29 01:23:55     message, payload = await protocol.read()  # type: ignore[union-attr]
+2025-05-29 01:23:55                        ^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/aiohttp/streams.py", line 640, in read
+2025-05-29 01:23:55     await self._waiter
+2025-05-29 01:23:55 aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+2025-05-29 01:23:55 
+2025-05-29 01:23:55 The above exception was the direct cause of the following exception:
+2025-05-29 01:23:55 
+2025-05-29 01:23:55 Traceback (most recent call last):
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/exchange.py", line 640, in _api_reload_markets
+2025-05-29 01:23:55     return await self._api_async.load_markets(reload=reload, params={})
+2025-05-29 01:23:55            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 293, in load_markets
+2025-05-29 01:23:55     raise e
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 285, in load_markets
+2025-05-29 01:23:55     result = await self.markets_loading
+2025-05-29 01:23:55              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 275, in load_markets_helper
+2025-05-29 01:23:55     markets = await self.fetch_markets(params)
+2025-05-29 01:23:55               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/binance.py", line 3047, in fetch_markets
+2025-05-29 01:23:55     results = await asyncio.gather(*promisesRaw)
+2025-05-29 01:23:55               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/binance.py", line 11331, in request
+2025-05-29 01:23:55     response = await self.fetch2(path, api, method, params, headers, body, config)
+2025-05-29 01:23:55                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 895, in fetch2
+2025-05-29 01:23:55     raise e
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 886, in fetch2
+2025-05-29 01:23:55     return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+2025-05-29 01:23:55            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/home/ftuser/.local/lib/python3.12/site-packages/ccxt/async_support/base/exchange.py", line 250, in fetch
+2025-05-29 01:23:55     raise ExchangeNotAvailable(details) from e
+2025-05-29 01:23:55 ccxt.base.errors.ExchangeNotAvailable: binance GET https://fapi.binance.com/fapi/v1/exchangeInfo
+2025-05-29 01:23:55 
+2025-05-29 01:23:55 The above exception was the direct cause of the following exception:
+2025-05-29 01:23:55 
+2025-05-29 01:23:55 Traceback (most recent call last):
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/exchange.py", line 680, in reload_markets
+2025-05-29 01:23:55     self._markets = retrier(self._load_async_markets, retries=retries)(reload=True)
+2025-05-29 01:23:55                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/common.py", line 202, in wrapper
+2025-05-29 01:23:55     raise ex
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/common.py", line 187, in wrapper
+2025-05-29 01:23:55     return f(*args, **kwargs)
+2025-05-29 01:23:55            ^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/exchange.py", line 653, in _load_async_markets
+2025-05-29 01:23:55     markets = self.loop.run_until_complete(self._api_reload_markets(reload=reload))
+2025-05-29 01:23:55               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/usr/local/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+2025-05-29 01:23:55     return future.result()
+2025-05-29 01:23:55            ^^^^^^^^^^^^^^^
+2025-05-29 01:23:55   File "/freqtrade/freqtrade/exchange/exchange.py", line 644, in _api_reload_markets
+2025-05-29 01:23:55     raise TemporaryError(
+2025-05-29 01:23:55 freqtrade.exceptions.TemporaryError: Error in reload_markets due to ExchangeNotAvailable. Message: binance GET https://fapi.binance.com/fapi/v1/exchangeInfo
