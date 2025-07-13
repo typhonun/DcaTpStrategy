@@ -22,8 +22,8 @@
     },
 
     "unfilledtimeout": {
-        "entry": 1,
-        "exit": 3,
+        "entry": 10,
+        "exit": 10,
         "exit_timeout_count": 0,
         "unit": "minutes"
 },
