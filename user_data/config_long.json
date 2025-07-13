@@ -65,7 +65,6 @@
               "XRP/USDT:USDT"
         ],
         "pair_blacklist": [
-
         ]
     },
     "pairlists": [
@@ -79,8 +78,8 @@
     ],
     "telegram": {
       "enabled": true,
-      "token": "8140433880:AAFKtXpsruYj8nb4AUAUlF3DLtw6kHfwlts",
-      "chat_id": "6228589079",
+      "token": "",
+      "chat_id": "",
       "rpc_methods": true,
       "allow_custom_messages": true,
       "keyboard": [
@@ -96,11 +95,11 @@
         "listen_port": 8888,
         "verbosity": "error",
         "enable_openapi": true,
-        "jwt_secret_key": "c4dc01b88c10120fe2dce84f0f69e4b6cf6ec15a16a456fde526e0c1fff678f1",
-        "ws_token": "1IdQCoSWwFN4Zt1IpOwJ0lmWU88MIy_tJQ",
+        "jwt_secret_key": "",
+        "ws_token": "",
         "CORS_origins": ["http://127.0.0.1:8888"],
-        "username": "freqtrader",
-        "password": "zy147258"
+        "username": "",
+        "password": ""
     },
     "bot_name": "freqtrade-long",
     "initial_state": "running",
