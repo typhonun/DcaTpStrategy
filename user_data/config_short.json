@@ -22,8 +22,8 @@
     },
 
     "unfilledtimeout": {
-        "entry": 1,
-        "exit": 3,
+        "entry": 10,
+        "exit": 10,
         "exit_timeout_count": 0,
         "unit": "minutes"
     },
@@ -85,8 +85,8 @@
         "listen_port": 8888,
         "verbosity": "error",
         "enable_openapi": true,
-        "jwt_secret_key": "f3dd5f7406655eb05de99152303f1af92e16ab7c2206a91f90f3285e20dbc05f",
-        "ws_token": "o9JAAXgopFRe_NwO8zcj9xYL6SLTdw7plA",
+        "jwt_secret_key": "",
+        "ws_token": "",
         "CORS_origins": ["http://127.0.0.1:8888"],
         "username": "",
         "password": ""
