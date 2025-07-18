@@ -26,22 +26,29 @@ telegram,启动命令
 ```
 mkdir ft_userdata
 cd ft_userdata/
-curl https://raw.githubusercontent.com/freqtrade/freqtrade/stable/docker-compose.yml -o docker-compose.yml
 # 克隆yml文件
-docker compose pull
+curl https://raw.githubusercontent.com/freqtrade/freqtrade/stable/docker-compose.yml -o docker-compose.yml
 # 拉取docker镜像
-docker compose up -d
+docker compose pull
 # 启动交易机器人
-docker compose run --rm freqtrade create-userdir --userdir user_data
+docker compose up -d
 # 建立使用者目录
-docker compose run --rm freqtrade new-config --config user_data/config.json
+docker compose run --rm freqtrade create-userdir --userdir user_data
 # 建立config配置
+docker compose run --rm freqtrade new-config --config user_data/config.json
 ```
 ## 使用
 ```
-
-docker-compose run --rm freqtrade download-data --exchange binance --timeframe 15m --timerange
-# 下载 OHLCV 数据
+# 查看可下载的时间戳
+docker-compose run --rm freqtrade list-timeframes
+# 下载 OHLCV 数据（以30m为例）
+docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m --timerange
+# 列出可用数据
+docker-compose run --rm freqtrade list-data --exchange binance
+# 传递标志所需的可用数据
+docker-compose run --rm freqtrade list-data --exchange binance
+# 回测数据
+docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m
 ```
 
 
