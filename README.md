@@ -4,8 +4,6 @@
 
 DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
-
-
 优点：
 同时运行多个不同策略或方向的交易机器人
 根据风险偏好调整杠杆，止盈条件和仓位大小。
@@ -15,9 +13,6 @@ DcaTpLong复制到strategies目录下，config配置可供参考，docker-compos
 无固定止损，最大风险为强平。
 指标设置，成交逻辑不一定最优。
 
-## 免责声明
-
-本策略仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
 
 ## 安装(以docker为例)
 
@@ -37,6 +32,7 @@ docker compose run --rm freqtrade create-userdir --userdir user_data
 # 建立config配置
 docker compose run --rm freqtrade new-config --config user_data/config.json
 ```
+
 ## 使用
 ```
 # 查看可下载的时间戳
@@ -64,6 +60,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 - `/forceshort`: 立即开空
 - `/forceexit`: 立即退出
 ![telegram](./example/telegram.png)
+
 
 ## 策略介绍
 
@@ -114,6 +111,9 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
 DCA 持续 16 小时以上，价格突破布林上轨减仓 30%。
 
 
+## 免责声明
+
+本策略仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
 #### 不足和待完善之处请谅解！源码仅供学习建议
 
 
