@@ -4,7 +4,7 @@
 
 DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
-![telegram](https://raw.github.com/typhonun/RsiDcaStrategy/main/example/telegram.png)
+
 
 优点：
 可根据风险偏好调整杠杆，止盈条件和仓位大小。
@@ -17,8 +17,6 @@ DcaTpLong复制到strategies目录下，config配置可供参考，docker-compos
 ## 免责声明
 
 本策略仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
-
-telegram,启动命令
 
 ## 安装(以docker为例)
 
@@ -63,7 +61,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 - `/forcelong`:立即开多
 - `/forceshort`:立即开空
 - `/forceexit`:立即退出
-
+![telegram](./example/telegram.png)
 
 ## 策略介绍
 
