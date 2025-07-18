@@ -7,7 +7,8 @@ DcaTpLong复制到strategies目录下，config配置可供参考，docker-compos
 
 
 优点：
-可根据风险偏好调整杠杆，止盈条件和仓位大小。
+同时运行多个不同策略或方向的交易机器人
+根据风险偏好调整杠杆，止盈条件和仓位大小。
 可优化MACD,KDJ,EMA,RSI指标和加减仓参数。
 
 缺点：
@@ -55,13 +56,13 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 #### 更多指令请参阅[文件](https://www.freqtrade.io/en/latest/telegram-usage/)
 
-- `/start`:启动交易
-- `/stop`:关闭交易
-- `/stopentry`:停止新的交易
-- `/reload_config`:加载config配置
-- `/forcelong`:立即开多
-- `/forceshort`:立即开空
-- `/forceexit`:立即退出
+- `/start`: 启动交易
+- `/stop`: 关闭交易
+- `/stopentry`: 停止新的交易
+- `/reload_config`: 加载config配置
+- `/forcelong`: 立即开多
+- `/forceshort`: 立即开空
+- `/forceexit`: 立即退出
 ![telegram](./example/telegram.png)
 
 ## 策略介绍
