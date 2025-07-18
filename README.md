@@ -1,6 +1,8 @@
 ## DcaTp策略概述
 
-此项目是基于freqtrade框架研发的策略，安装方法参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/)，DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose可设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率。
+此项目是基于freqtrade框架研发的策略，安装详情参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/docker_quickstart/)。
+
+DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose可设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率。
 
 优点：
 可根据风险偏好调整杠杆，止盈条件和仓位大小。
