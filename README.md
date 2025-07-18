@@ -1,6 +1,6 @@
 ## DcaTp策略概述
 
-此项目是基于freqtrade框架研发的策略，。
+此项目是基于freqtrade框架研发的策略，配置默认有两个交易机器人，如需更多请自行参考设置。
 
 DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
@@ -58,6 +58,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 - `/start`:启动交易
 - `/stop`:关闭交易
 - `/stopentry`:停止新的交易
+- `/reload_config`:加载config配置
 - `/forcelong`:立即开多
 - `/forceshort`:立即开空
 - `/forceexit`:立即退出
