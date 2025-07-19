@@ -14,6 +14,7 @@ DcaTpLong复制到strategies目录下，config配置可供参考，docker-compos
 指标设置，成交逻辑不一定最优。
 
 
+
 ## 安装(以docker为例)
 
 #### 详情参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/docker_quickstart/)
@@ -78,20 +79,21 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
 
 #### 浮亏 DCA 加仓
 
-基于动态平均入场价，跌破 1−(0.01+dca_count×0.01)（dca_count 为已加仓次数），且 RSI<39，加仓 30%，触发浮亏止盈重置dca_count。
+基于动态平均入场价，跌破 1−(0.01+dca_count×0.01)（dca_count 浮虧为加仓次数），且 RSI<39，加仓 30%，触发浮亏止盈重置dca_count。
 
-#### 浮盈加仓
+#### 浮盈 TP 加仓
 
-触发止盈后首次浮盈 dca_count=1 加仓60%，后续仍止盈无回撤 dca_count >=2 加仓80%。
+触发止盈后首次浮盈 tp_count=1 加仓60%，后续仍止盈无回撤 tp_count >=2 加仓80%。
+觸發止盈回撤重置tp_count
 
 #### 分批止盈
 
 已有 DCA（dca_count>0），按 0.3+0.1×dca_count 减仓；
-已有 浮盈止盈（tp_count>0），减仓30%，标记可浮盈加仓
+已有 TP（tp_count>0），减仓30%，标记可浮盈加仓
 
 #### 浮盈后回撤减仓
 
-已有分批止盈（tp_count>0），且持仓浮盈跌回至 1% 以下时，按 0.2+0.5×tp_count(浮盈加仓次数) 减仓。
+已有 TP（tp_count>0），且持仓浮盈跌回至 1% 以下时，按 0.2+0.5×tp_count(浮盈加仓次数) 减仓。
 
 #### 浮盈回落加仓
 
