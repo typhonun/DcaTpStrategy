@@ -1,6 +1,6 @@
 ## DcaTp策略概述
 
-此项目是基于freqtrade框架研发的策略，目的是同時持有多空倉位，依靠波动获得高低差利润，类似中性网格，也可以只持有一个方向的仓位，other目录里有其它开源者的策略。配置默认有三個个交易机器人，如有需要，请自行参考设置。
+此项目是基于freqtrade框架研发的策略，目的是同時持有多空倉位，依靠波动获得高低差利润，类似中性网格，也可以只持有一个方向的仓位，other目录里有其它开源者的策略。配置默认有三個个交易机器人，可自行设置。
 
 若要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000，8001和8002）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。 leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
@@ -44,8 +44,6 @@ docker-compose run --rm freqtrade list-timeframes
 docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m --timerange
 # 列出可用数据
 docker-compose run --rm freqtrade list-data --exchange binance
-# 传递标志所需的可用数据
-docker-compose run --rm freqtrade list-data --exchange binance
 # 回测数据
 docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m
 ```
@@ -73,11 +71,11 @@ MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99且为盈利状态时（current_pro
 
 #### 空头信号止损（可选）
 
-MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
+MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 
 #### 趋势回撤加仓
 
-价格回落到14根k线中收盘价最高的k线的0.99且EMA9>EMA21>EMA99时，加仓30%
+价格回落到14根k线中收盘价最高的k线的0.99且EMA9>EMA21>EMA99时，加仓30%。
 
 #### 浮亏 DCA 加仓
 
@@ -86,12 +84,12 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
 #### 浮盈 TP 加仓
 
 触发止盈后首次浮盈 tp_count=1 加仓60%，后续仍止盈无回撤 tp_count >=2 加仓80%。
-觸發止盈回撤重置tp_count
+觸發止盈回撤重置tp_count。
 
 #### 分批止盈
 
-已有 DCA（dca_count>0），按 0.3+0.1×dca_count 减仓；
-已有 TP（tp_count>0），减仓30%，标记可浮盈加仓
+已有 DCA（dca_count>0），按 0.3+0.1×dca_count 减仓。
+已有 TP（tp_count>0），减仓30%，标记可浮盈加仓。
 
 #### 浮盈后回撤减仓
 
@@ -105,14 +103,19 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
 
 抄底： KDJ_J<0 且 RSI<35 时，加仓 50%。
 逃顶： KDJ_J>100 且 RSI>70 时，减仓 50%。
-价格回落到布林中轨才会重置信号，避免反复触发
-
-#### 低保证金补仓
-当前保证金 < 10 USDT（可自行设置）且已持续 3h时，加仓至10 USDT。
+价格突破布林上轨重置抄底信号，跌破下轨重置逃顶信号，避免反复触发。
 
 #### 16h DCA 后减仓
 
 DCA 持续 16 小时以上，价格突破布林上轨减仓 30%。
+
+#### 小仓位加仓
+
+持仓量小于总资金1%时加仓持仓量50%。
+
+#### 大仓位减仓
+
+持仓量大于总资金30%时减仓20%
 
 
 ## 免责声明
