@@ -1,12 +1,12 @@
 ## DcaTp策略概述
 
-此项目是基于freqtrade框架研发的策略，配置默认有两个交易机器人，如需更多请自行参考设置。
+此项目是基于freqtrade框架研发的策略，目的是同時持有多空倉位，依靠波动获得高低差利润，类似中性网格，配置默认有三個个交易机器人，如有需要，请自行参考设置。
 
-DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000和8001）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
+若要使用，請將DcaTpLong复制到strategies目录下，config配置可供参考，docker-compose设置端口号（默认为8000，8001和8002）。可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
 优点：
 同时运行多个不同策略或方向的交易机器人
-根据风险偏好调整杠杆，止盈条件和仓位大小。
+可根据风险偏好调整杠杆，止盈条件和仓位大小。
 可优化MACD,KDJ,EMA,RSI指标和加减仓参数。
 
 缺点：
@@ -97,7 +97,7 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%
 
 #### 浮盈回落加仓
 
-当前价格回落至止盈价的 99%时，加仓 20%。
+当前价格回落至止盈价的 99%时，加仓 10%。
 
 #### 抄底/逃顶
 
