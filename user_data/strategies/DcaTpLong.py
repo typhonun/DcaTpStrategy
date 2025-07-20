@@ -93,19 +93,19 @@ class DcaTpLong(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # 趋势入场
-        # long_cond1 = (
-        #         (dataframe['macd_30'] > dataframe['macdsig_30']) &
-        #         (dataframe['k_30'] > dataframe['d_30']) &
-        #         (dataframe['adx_30'] > 25) &
-        #         (dataframe['ema9_30'] > dataframe['ema21_30']) &
-        #         (dataframe['ema21_30'] > dataframe['ema99_30'])
-        # )
+        long_cond1 = (
+                (dataframe['macd_30'] > dataframe['macdsig_30']) &
+                (dataframe['k_30'] > dataframe['d_30']) &
+                (dataframe['adx_30'] > 25) &
+                (dataframe['ema9_30'] > dataframe['ema21_30']) &
+                (dataframe['ema21_30'] > dataframe['ema99_30'])
+        )
         # 抄底入场
         long_cond2 = (
                 (dataframe['close'] < dataframe['bb_lowerband']) &
                 (dataframe['rsi'] < 35)
         )
-        dataframe['enter_long'] = (long_cond2).astype(int)
+        dataframe['enter_long'] = (long_cond1 | long_cond2).astype(int)
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -194,7 +194,6 @@ class DcaTpLong(IStrategy):
         #     return amt, 'trend_stop50_long'
 
         # -- 趋势回撤加仓 --
-        # 14 根 30m K 线的收盘价计算最高价
         high14 = df['close'].rolling(14).max().iat[-1]
         if (last['ema9_30'] > last['ema21_30'] > last['ema99_30']
                 and last['close'] == high14):
@@ -358,7 +357,7 @@ class DcaTpLong(IStrategy):
         if u > 0 and last_dca_time and not reduce6_done:
             dca_dt = datetime.fromtimestamp(int(last_dca_time))
             if current_time >= dca_dt + timedelta(hours=16):  # Dca持续时间参数
-                # 要求价格突破布林带上轨
+                # 价格突破布林带上轨
                 if price > upper:
                     amt = -0.30 * margin  # 布林上轨卖出参数
                     logger.info(
@@ -373,11 +372,11 @@ class DcaTpLong(IStrategy):
         total_usdt = self.wallets.get_total('USDT')
         margin = float(trade.stake_amount)
         # -- 仓位过小加仓 --
-        if total_usdt > 0 and margin < total_usdt * 0.01:  # 仓位下限
-            buy_amt = 0.50 * margin  # 小仓位加仓参数
+        if total_usdt > 0 and margin < total_usdt * 0.1:  # 仓位下限
+            buy_amt = 1.0 * margin  # 小仓位加仓参数
             logger.info(
                 f"{GREEN}[{trade.pair}] 保证金过低，当前保证金={margin:.4f} USDT, "
-                f"钱包总资产={total_usdt:.4f} USDT，加仓→{buy_amt:.4f} USDT{RESET}"
+                f"总资产={total_usdt:.4f} USDT，加仓→{buy_amt:.4f} USDT{RESET}"
             )
             return buy_amt, 'add50_low_margin'
         # -- 仓位过大减仓 --
@@ -385,7 +384,7 @@ class DcaTpLong(IStrategy):
             sell_amt = -0.20 * margin  # 大仓位减仓参数
             logger.info(
                 f"{YELLOW}[{trade.pair}] 保证金过大，当前保证金={margin:.4f} USDT, "
-                f"钱包总资产={total_usdt:.4f} USDT，减仓→{abs(sell_amt):.4f} USDT{RESET}"
+                f"总资产={total_usdt:.4f} USDT，减仓→{abs(sell_amt):.4f} USDT{RESET}"
             )
             return sell_amt, 'reduce20_over_collateral'
 
