@@ -1,4 +1,3 @@
-
 {
     "$schema": "https://schema.freqtrade.io/schema.json",
     "max_open_trades": 1,
@@ -6,8 +5,9 @@
     "stake_amount": 10,
     "tradable_balance_ratio": 0.5,
     "fiat_display_currency": "USD",
+    "fiat_conversion_refresh_interval": 600,
     "dry_run": true,
-    "dry_run_wallet": 100,
+    "dry_run_wallet": 500,
     "cancel_open_orders_on_exit": false,
     "trading_mode": "futures",
     "margin_mode": "cross",
@@ -50,10 +50,10 @@
         "ccxt_config": {"enableRateLimit": true},
         "ccxt_async_config": {
             "enableRateLimit": true,
-            "rateLimit": 200},
-        "timeout_cancel": 300,
+            "rateLimit": 200
+        },
         "pair_whitelist": [
-              "ADA/USDT:USDT"
+              "ETH/USDT:USDT"
         ],
         "pair_blacklist": [
 
@@ -82,12 +82,12 @@
     "api_server": {
         "enabled": true,
         "listen_ip_address": "0.0.0.0",
-        "listen_port": 8888,
+        "listen_port": 8000,
         "verbosity": "error",
         "enable_openapi": true,
         "jwt_secret_key": "",
         "ws_token": "",
-        "CORS_origins": ["http://127.0.0.1:8888"],
+        "CORS_origins": ["http://127.0.0.1:8000"],
         "username": "",
         "password": ""
     },
