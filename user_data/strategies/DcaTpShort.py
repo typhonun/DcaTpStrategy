@@ -168,7 +168,7 @@ class DcaTpShort(IStrategy):
             trade.set_custom_data('last_trend_side', 'short')
             amt = 0.6 * margin  # 趋势加仓参数
             logger.info(
-                f"{GREEN}[{trade.pair}] 空头趋势信号 + 加空60%{RESET}"
+                f"{GREEN}[{trade.pair}] 空头趋势加空60%{RESET}"
                 f"保证金={margin:.4f}, 加空={abs(amt):.4f} USDT{RESET}"
             )
             return amt, 'trend_add60_bear'
