@@ -69,7 +69,7 @@
         }
     ],
     "telegram": {
-      "enabled": flase,
+      "enabled": false,
       "token": "",
       "chat_id": "",
       "rpc_methods": true,
