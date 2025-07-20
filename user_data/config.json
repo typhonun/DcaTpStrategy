@@ -3,7 +3,7 @@
     "max_open_trades": 1,
     "stake_currency": "USDT",
     "stake_amount": 10,
-    "tradable_balance_ratio": 0.5,
+    "tradable_balance_ratio": 0.6,
     "fiat_display_currency": "USD",
     "fiat_conversion_refresh_interval": 600,
     "dry_run": true,
