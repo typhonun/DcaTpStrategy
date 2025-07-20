@@ -67,6 +67,10 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 ## 策略介绍
 
+#### 趋势/抄底入场
+
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99或者布林下轨且rsi<35时入场。
+
 #### 趋势加仓
 
 MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99且为盈利状态时（current_profit>0），加仓 60%，KDJ死叉减仓30%。
@@ -77,7 +81,7 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 
 #### 趋势回撤加仓
 
-价格回落到14根k线中收盘价最高的k线的0.99且EMA9>EMA21>EMA99时，加仓30%。
+价格回落到14根k线中收盘价最高的k线的0.99且EMA9>EMA21>EMA99时，加仓20%。
 
 #### 浮亏 DCA 加仓
 
@@ -85,17 +89,16 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 
 #### 浮盈 TP 加仓
 
-触发止盈后首次浮盈 tp_count=1 加仓60%，后续仍止盈无回撤 tp_count >=2 加仓80%。
-觸發止盈回撤重置tp_count。
+触发止盈后首次浮盈 tp_count=1 加仓60%，后续仍止盈无回撤 tp_count >=2 加仓80%，觸發止盈回撤重置tp_count。
 
 #### 分批止盈
 
-已有 DCA（dca_count>0），按 0.3+0.1×dca_count 减仓。
-已有 TP（tp_count>0），减仓30%，标记可浮盈加仓。
+已有 DCA（dca_count>0），触发止盈按 0.3+0.1×dca_count(浮亏加仓次数) 减仓。
+已有 TP（tp_count>0），触发止盈减仓30%，标记可浮盈加仓。
 
 #### 浮盈后回撤减仓
 
-已有 TP（tp_count>0），且持仓浮盈跌回至 1% 以下时，按 0.2+0.5×tp_count(浮盈加仓次数) 减仓。
+已有 TP（tp_count>0），且持仓浮盈跌回至 1% 以下时，按 0.2+0.5×tp_count(浮盈加仓次数) 保本减仓。
 
 #### 浮盈回落加仓
 
@@ -104,7 +107,7 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 #### 抄底/逃顶
 
 抄底： KDJ_J<0 且 RSI<35 时，加仓 50%。
-逃顶： KDJ_J>100 且 RSI>70 时，减仓 50%。
+逃顶： KDJ_J>100 且 RSI>70 时，减仓 60%。
 价格突破布林上轨重置抄底信号，跌破下轨重置逃顶信号，避免反复触发。
 
 #### 16h DCA 后减仓
