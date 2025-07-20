@@ -167,7 +167,7 @@ class DcaTpLong(IStrategy):
             trade.set_custom_data('trend_level', 2)
             trade.set_custom_data('last_trend_side', 'long')
             amt = 0.6 * margin  # 趋势加仓参数
-            logger.info(f"{GREEN}[{trade.pair}] 大多头趋势加仓60%{RESET} 保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT")
+            logger.info(f"{GREEN}[{trade.pair}] 多头趋势加仓60%{RESET} 保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT")
             return amt, 'trend_add60_bull'
         # KDJ 衰弱减仓
         if level == 2 and last['k_30'] < last['d_30']:
