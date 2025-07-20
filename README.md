@@ -71,7 +71,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 ![telegram](./example/telegram.png)
 
 
-## 策略介绍
+## 介绍
 
 #### 趋势/抄底入场
 
