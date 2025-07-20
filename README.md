@@ -58,19 +58,6 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 ```
 
 
-## Telegram RPC 
-
-#### 更多指令请参阅[文件](https://www.freqtrade.io/en/latest/telegram-usage/)
-
-- `/start`: 启动交易
-- `/stop`: 关闭交易
-- `/stopentry`: 停止新的交易
-- `/reload_config`: 加载config配置
-- `/forcelong`: 立即开多
-- `/forceshort`: 立即开空
-- `/forceexit`: 立即退出
-
-
 ## 介绍
 
 #### 趋势/抄底入场
@@ -127,6 +114,20 @@ DCA 持续 16 小时以上，价格突破布林上轨减仓 30%。
 #### 大仓位减仓
 
 持仓量大于总资金30%时减仓20%
+
+
+## Telegram RPC 
+
+#### 更多指令请参阅[文件](https://www.freqtrade.io/en/latest/telegram-usage/)
+
+- `/start`: 启动交易
+- `/stop`: 关闭交易
+- `/stopentry`: 停止新的交易
+- `/reload_config`: 加载config配置
+- `/forcelong`: 立即开多
+- `/forceshort`: 立即开空
+- `/forceexit`: 立即退出
+
 
 
 ## 免责声明
