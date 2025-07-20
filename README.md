@@ -75,7 +75,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 #### 趋势/抄底入场
 
-MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99或者布林下轨且rsi<35时入场。
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99或者布林下轨,rsi<35时入场。
 
 #### 趋势加仓
 
@@ -132,6 +132,7 @@ DCA 持续 16 小时以上，价格突破布林上轨减仓 30%。
 ## 免责声明
 
 本策略仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
+
 #### 不足和待完善之处请谅解！源码仅供学习建议
 
 
