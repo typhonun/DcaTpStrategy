@@ -369,9 +369,9 @@ class DcaTpShort(IStrategy):
             if current_time >= dca_dt + timedelta(hours=16):  # Dca持续时间参数
                 lower = last['bb_lowerband']
                 price = last['close']
-                # 要求价格跌破布林带下轨
+                # 价格跌破布林带下轨
                 if price < lower:
-                    amt = -0.30 * margin  # 布林上轨卖出参数
+                    amt = -0.30 * margin  # 布林下轨卖出参数
                     logger.info(
                         f"{YELLOW}[{trade.pair}][16h DCA后 · 跌破下轨减仓30%] "
                         f"当前价={price:.4f}, 下轨={lower:.4f}, 保证金={margin:.2f}, 减仓={abs(amt):.2f} USDT{RESET}"
@@ -385,10 +385,10 @@ class DcaTpShort(IStrategy):
         margin = float(trade.stake_amount)
         # -- 仓位过小加仓 --
         if total_usdt > 0 and margin < total_usdt * 0.01:  # 仓位下限
-            buy_amt = 0.50 * margin  # 小仓位加仓参数
+            buy_amt = 1.0 * margin  # 小仓位加仓参数
             logger.info(
                 f"{GREEN}[{trade.pair}] 保证金过低，当前保证金={margin:.4f} USDT, "
-                f"钱包总资产={total_usdt:.4f} USDT，加仓→{buy_amt:.4f} USDT{RESET}"
+                f"总资产={total_usdt:.4f} USDT，加仓→{buy_amt:.4f} USDT{RESET}"
             )
             return buy_amt, 'add50_low_margin'
         # -- 仓位过大减仓 --
@@ -396,7 +396,7 @@ class DcaTpShort(IStrategy):
             sell_amt = -0.20 * margin  # 大仓位减仓参数
             logger.info(
                 f"{YELLOW}[{trade.pair}] 保证金过大，当前保证金={margin:.4f} USDT, "
-                f"钱包总资产={total_usdt:.4f} USDT，减仓→{abs(sell_amt):.4f} USDT{RESET}"
+                f"总资产={total_usdt:.4f} USDT，减仓→{abs(sell_amt):.4f} USDT{RESET}"
             )
             return sell_amt, 'reduce20_over_collateral'
 
