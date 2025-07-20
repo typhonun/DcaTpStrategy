@@ -372,7 +372,7 @@ class DcaTpLong(IStrategy):
         total_usdt = self.wallets.get_total('USDT')
         margin = float(trade.stake_amount)
         # -- 仓位过小加仓 --
-        if total_usdt > 0 and margin < total_usdt * 0.1:  # 仓位下限
+        if total_usdt > 0 and margin < total_usdt * 0.01:  # 仓位下限
             buy_amt = 1.0 * margin  # 小仓位加仓参数
             logger.info(
                 f"{GREEN}[{trade.pair}] 保证金过低，当前保证金={margin:.4f} USDT, "
