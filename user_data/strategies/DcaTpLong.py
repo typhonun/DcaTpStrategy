@@ -194,9 +194,8 @@ class DcaTpLong(IStrategy):
         #     return amt, 'trend_stop50_long'
 
         # -- 趋势回撤加仓 --
-        # 1) 用 14 根 30m K 线的收盘价计算最高价
+        # 14 根 30m K 线的收盘价计算最高价
         high14 = df['close'].rolling(14).max().iat[-1]
-        # 2) 当满足三条 EMA 顺序 且本根收盘 == 14 根最高，标记这一高点
         if (last['ema9_30'] > last['ema21_30'] > last['ema99_30']
                 and last['close'] == high14):
             trade.set_custom_data('ref_high', float(high14))
