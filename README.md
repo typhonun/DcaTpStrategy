@@ -62,7 +62,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 #### 趋势/抄底入场
 
-MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99或者布林下轨,rsi<35时入场。
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时或者布林下轨且rsi<35时入场。
 
 #### 趋势加仓
 
