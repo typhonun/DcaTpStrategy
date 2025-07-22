@@ -269,7 +269,7 @@ class DcaTpShort(IStrategy):
             # 连续 2 次及以上的 30% 分批止盈，则本次80%
             if n >= 2:
                 amt = 0.80 * margin  # 连续浮盈加仓参数
-                tag = 'rebuy100_short'
+                tag = 'rebuy80_short'
                 logger.info(
                     f"[{trade.pair}][分批止盈 Step{n + 1} 加仓80%] u={u}, n={n}, "
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={abs(amt):.4f} USDT{RESET}"
@@ -277,7 +277,7 @@ class DcaTpShort(IStrategy):
             else:
                 # 第一次加仓按 60%
                 amt = 0.6 * margin  # 首次浮盈加仓参数
-                tag = 'rebuy70_short'
+                tag = 'rebuy60_short'
                 logger.info(
                     f"[{trade.pair}][分批止盈 Step{n + 1} 加仓60%] u={u}, n={n}, "
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={abs(amt):.4f}{RESET}"
