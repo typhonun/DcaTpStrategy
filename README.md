@@ -50,7 +50,7 @@ docker compose run --rm freqtrade new-config --config user_data/config.json
 # 查看可下载的时间戳
 docker-compose run --rm freqtrade list-timeframes
 # 下载 OHLCV 数据（以30m为例）
-docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m --timerange
+docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m
 # 列出可用数据
 docker-compose run --rm freqtrade list-data --exchange binance
 # 回测数据
