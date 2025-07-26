@@ -46,7 +46,8 @@ class DcaTpLong(IStrategy):
             'bottom_added': False, 'top_reduced': False,
             'bb_added': False, 'pullback_ready': True,
             'reset_needed': False, 'last_trend_side': None,
-            'tp_repull_done': False
+            'last_fallback_price': None, 'fallback_repull_done': False
+            # 'tp_repull_done': False
         }
         for k, v in flags.items():
             trade.set_custom_data(k, v)
@@ -140,17 +141,31 @@ class DcaTpLong(IStrategy):
         mid = last['bb_midband']
 
         # -- 止盈回落加仓 --
-        last_tp_price = trade.get_custom_data('last_tp_price')
-        repull_done = bool(trade.get_custom_data('tp_repull_done'))
-        if last_tp_price and not repull_done and price <= last_tp_price * 0.99:
-            amt = 0.10 * margin
-            trade.set_custom_data('tp_repull_done', True)
+        last_fb_price = trade.get_custom_data('last_fallback_price')
+        repulled = bool(trade.get_custom_data('fallback_repull_done'))
+        # 当价格回升到回撤价的 0.995 倍时加空
+        if last_fb_price and not repulled and price <= last_fb_price * 0.995:
+            amt = 0.20 * margin
+            trade.set_custom_data('fallback_repull_done', True)
             logger.info(
-                f"{GREEN}[{trade.pair}] 止盈回落加仓10%: "
-                f"止盈价={last_tp_price:.4f}, 当前价={price:.4f}, "
-                f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
+                f"{GREEN}[{trade.pair}] 回撤减仓价回落加仓20%: "
+                f"回撤价={last_fb_price:.4f}, 当前价={price:.4f}, "
+                f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
             )
-            return amt, 'tp_repull10'
+            return amt, 'tp_repull20'
+
+        # # -- 止盈回落加仓 --
+        # last_tp_price = trade.get_custom_data('last_tp_price')
+        # repull_done = bool(trade.get_custom_data('tp_repull_done'))
+        # if last_tp_price and not repull_done and price <= last_tp_price * 0.99:
+        #     amt = 0.10 * margin
+        #     trade.set_custom_data('tp_repull_done', True)
+        #     logger.info(
+        #         f"{GREEN}[{trade.pair}] 止盈回落加仓10%: "
+        #         f"止盈价={last_tp_price:.4f}, 当前价={price:.4f}, "
+        #         f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
+        #     )
+        #     return amt, 'tp_repull10'
 
         # -- 趋势加多 --
         level = int(trade.get_custom_data('trend_level') or 0)
@@ -177,21 +192,21 @@ class DcaTpLong(IStrategy):
             logger.info(f"{RED}[{trade.pair}] KDJ 衰弱减仓30%{RESET} 保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT")
             return amt, 'kdj_reduce30_long'
 
-        # # -- 空头信号止损 --
-        # last_side = trade.get_custom_data('last_trend_side') or 'none'
-        # is_bearish_trend = (
-        #         last['macd_30'] < last['macdsig_30'] and
-        #         last['k_30'] < last['d_30'] and
-        #         last['adx_30'] > 25 and
-        #         last['ema9_30'] < last['ema21_30'] < last['ema99_30']
-        # )
-        # if last_side == 'long' and is_bearish_trend:
-        #     trade.set_custom_data('last_trend_side', 'short')
-        #     amt = -0.5 * margin
-        #     logger.info(
-        #         f"{BLUE}[{trade.pair}] 空头信号，多头减仓50%{RESET} 保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT"
-        #     )
-        #     return amt, 'trend_stop50_long'
+        # -- 空头信号止损 --
+        last_side = trade.get_custom_data('last_trend_side') or 'none'
+        is_bearish_trend = (
+                last['macd_30'] < last['macdsig_30'] and
+                last['k_30'] < last['d_30'] and
+                last['adx_30'] > 25 and
+                last['ema9_30'] < last['ema21_30'] < last['ema99_30']
+        )
+        if last_side == 'long' and is_bearish_trend:
+            trade.set_custom_data('last_trend_side', 'short')
+            amt = -0.5 * margin
+            logger.info(
+                f"{BLUE}[{trade.pair}] 空头信号，多头减仓50%{RESET} 保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT"
+            )
+            return amt, 'trend_stop50_long'
 
         # -- 趋势回撤加仓 --
         high14 = df['close'].rolling(14).max().iat[-1]
@@ -206,15 +221,15 @@ class DcaTpLong(IStrategy):
                 and current_rate <= ref * 0.99
                 and last['ema9_30'] > last['ema21_30']):
             # 回撤到高点 99% 且 EMA9 仍在 EMA21 之上时，加仓 30%
-            amt = 0.20 * margin  # 回撤加仓参数
+            amt = 0.30 * margin  # 回撤加仓参数
             trade.set_custom_data('pullback_done', True)
             trade.set_custom_data('pullback_ready', False)
             logger.info(
-                f"{BLUE}[{trade.pair}] 回撤加仓20%: "
+                f"{BLUE}[{trade.pair}] 回撤加仓30%: "
                 f"高点={ref:.4f}, 当前价={current_rate:.4f} "
                 f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
             )
-            return amt, 'pullback_dca20'
+            return amt, 'pullback_dca30'
 
         # -- 浮亏 DCA 加仓 --
         if df.empty:
@@ -233,7 +248,7 @@ class DcaTpLong(IStrategy):
         # 触发加仓
         rsi_thresh = max(0, 35)  # RSI参数
         if not dca_done and current_rate <= threshold and last_rsi < rsi_thresh:
-            buy_amt = 0.2 * margin  # DCA加仓参数
+            buy_amt = 0.3 * margin  # DCA加仓参数
             leverage = self.leverage(trade.pair)
             prev_qty = float(trade.amount)
             prev_cost = prev_qty * avg_entry
@@ -258,7 +273,7 @@ class DcaTpLong(IStrategy):
         need_rebuy = bool(trade.get_custom_data('need_rebuy'))
         n = int(trade.get_custom_data('tp_count') or 0)
         if need_rebuy:
-            # 连续 2 次及以上的 30% 分批止盈，则本次加仓80%
+            # 连续 2 次及以上的浮盈止盈，则本次加仓80%
             if n >= 2:
                 buy_amt = 0.8 * margin  # 连续浮盈加仓参数
                 tag = 'rebuy80'
@@ -267,11 +282,11 @@ class DcaTpLong(IStrategy):
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={buy_amt:.4f} USDT{RESET}"
                 )
             else:
-                # 第一次加仓按 60%
-                buy_amt = 0.60 * margin  # 首次浮盈加仓参数
-                tag = 'rebuy60'
+                # 第一次加仓按 70%
+                buy_amt = 0.70 * margin  # 首次浮盈加仓参数
+                tag = 'rebuy70'
                 logger.info(
-                    f"[{trade.pair}][分批止盈 Step{n + 1} 加仓60%] u={u}, n={n}, "
+                    f"[{trade.pair}][分批止盈 Step{n + 1} 加仓70%] u={u}, n={n}, "
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={buy_amt:.4f}{RESET}"
                 )
             trade.set_custom_data('need_rebuy', False)
@@ -280,11 +295,14 @@ class DcaTpLong(IStrategy):
 
         # -- 止盈后回撤减仓 --
         if n > 0 and current_profit < 0.01:
-            pct = min(1.0, 0.20 + 0.05 * n)  # 回撤减仓卖出参数
+            pct = min(1.0, 0.20 + 0.05 * n)
             sell_amt = -pct * margin
+            trade.set_custom_data('last_fallback_price', order_price := current_rate)
+            trade.set_custom_data('fallback_repull_done', False)
             logger.info(
                 f"[{trade.pair}][止盈后回撤1%] u={u}, n={n}, {YELLOW}保证金={margin:.2f}{RESET},"
-                f"{GREEN}减仓={abs(sell_amt):.2f}{RESET}")
+                f"{GREEN}减仓={abs(sell_amt):.2f}{RESET}"
+            )
             trade.set_custom_data('dca_count', 0)
             trade.set_custom_data('tp_count', 0)
             trade.set_custom_data('dca_done', False)
@@ -315,16 +333,16 @@ class DcaTpLong(IStrategy):
                 return sell_amt, f"tp_afterDCA_{int(pct * 100)}%"
             else:
                 if not last_tp or Timestamp(last_tp, unit='s').floor('T') != candle_ts:
-                    sell_amt = -0.30 * margin  # 浮盈止盈卖出参数
+                    sell_amt = -0.40 * margin  # 浮盈止盈卖出参数
                     logger.info(
-                        f"[{trade.pair}][浮盈减仓 卖30%→后续加仓60%] u=0, n={n}->{n + 1}, "
+                        f"[{trade.pair}][浮盈减仓 卖40%→后续加仓70%] u=0, n={n}->{n + 1}, "
                         f"{YELLOW}保证金={margin:.2f}{RESET}, {GREEN}减仓={abs(sell_amt):.2f}{RESET}"
                     )
                     trade.set_custom_data('tp_count', n + 1)
                     trade.set_custom_data('dca_count', 0)
                     trade.set_custom_data('dca_done', False)
                     trade.set_custom_data('last_tp_time', int(current_time.timestamp()))
-                    return sell_amt, "tp30"
+                    return sell_amt, "tp40"
 
         # -- 抄底逃顶 --
         if trade.get_custom_data('bottom_added') and price > upper:
@@ -341,22 +359,22 @@ class DcaTpLong(IStrategy):
             )
             return amt, 'bottom_add50'
         # 逃顶
-        if not trade.get_custom_data('top_reduced') and last['j_30'] > 100 and last['rsi'] > 70:  # KDJ_J&Rsi参数
+        if not trade.get_custom_data('top_reduced') and last['j_30'] > 100 and last['rsi'] > 65:  # KDJ_J&Rsi参数
             trade.set_custom_data('top_reduced', True)
-            amt = -0.6 * margin  # 逃顶卖出参数
+            amt = -0.5 * margin  # 逃顶卖出参数
             logger.info(
-                f"{RED}[{trade.pair}] 逃顶减仓60%: J={last['j_30']:.2f}, RSI={last['rsi']:.1f}, "
+                f"{RED}[{trade.pair}] 逃顶减仓50%: J={last['j_30']:.2f}, RSI={last['rsi']:.1f}, "
                 f"保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT{RESET}"
             )
-            return amt, 'top_reduce60'
+            return amt, 'top_reduce50'
 
-        # -- 16hDCA减仓 --
+        # -- 24hDCA减仓 --
         u = int(trade.get_custom_data('dca_count') or 0)
         last_dca_time = trade.get_custom_data('last_dca_time')
         reduce6_done = bool(trade.get_custom_data('dca_reduce_done'))
         if u > 0 and last_dca_time and not reduce6_done:
             dca_dt = datetime.fromtimestamp(int(last_dca_time))
-            if current_time >= dca_dt + timedelta(hours=16):  # Dca持续时间参数
+            if current_time >= dca_dt + timedelta(hours=24):  # Dca持续时间参数
                 # 价格突破布林带上轨
                 if price > upper:
                     amt = -0.30 * margin  # 布林上轨卖出参数
@@ -381,17 +399,16 @@ class DcaTpLong(IStrategy):
             return buy_amt, 'add50_low_margin'
         # -- 仓位过大减仓 --
         if total_usdt > 0 and margin > total_usdt * 0.30:  # 仓位上限
-            sell_amt = -0.20 * margin  # 大仓位减仓参数
+            sell_amt = -0.30 * margin  # 大仓位减仓参数
             logger.info(
                 f"{YELLOW}[{trade.pair}] 保证金过大，当前保证金={margin:.4f} USDT, "
                 f"总资产={total_usdt:.4f} USDT，减仓→{abs(sell_amt):.4f} USDT{RESET}"
             )
             return sell_amt, 'reduce20_over_collateral'
-
         return None
 
     def order_filled(self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs) -> None:
-        if getattr(order, 'ft_order_tag', None) == "tp30" and order.side == "sell":
+        if getattr(order, 'ft_order_tag', None) == "tp40" and order.side == "sell":
             trade.set_custom_data('need_rebuy', True)
             trade.set_custom_data('pullback_ready', True)
             trade.set_custom_data('last_tp_price', order.price)
