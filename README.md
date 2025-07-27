@@ -68,7 +68,7 @@ MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时或者布林下轨且rsi<35时�
 
 MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99且为盈利状态时（current_profit>0），加仓 60%，KDJ死叉减仓30%。
 
-#### 空头信号止损（可选）
+#### 空头信号止损
 
 MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 
