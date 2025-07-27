@@ -143,7 +143,7 @@ class DcaTpLong(IStrategy):
         # -- 止盈回落加仓 --
         last_fb_price = trade.get_custom_data('last_fallback_price')
         repulled = bool(trade.get_custom_data('fallback_repull_done'))
-        # 当价格回落到回撤价的 0.995 倍时加空
+        # 当价格回落到回撤价的 0.995 时加空
         if last_fb_price and not repulled and price <= last_fb_price * 0.995:  # 回落价价格参数
             amt = 0.20 * margin  # 回落加加仓参数
             trade.set_custom_data('fallback_repull_done', True)
@@ -153,19 +153,6 @@ class DcaTpLong(IStrategy):
                 f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
             )
             return amt, 'tp_repull20'
-
-        # # -- 止盈回落加仓 --
-        # last_tp_price = trade.get_custom_data('last_tp_price')
-        # repull_done = bool(trade.get_custom_data('tp_repull_done'))
-        # if last_tp_price and not repull_done and price <= last_tp_price * 0.99:
-        #     amt = 0.10 * margin
-        #     trade.set_custom_data('tp_repull_done', True)
-        #     logger.info(
-        #         f"{GREEN}[{trade.pair}] 止盈回落加仓10%: "
-        #         f"止盈价={last_tp_price:.4f}, 当前价={price:.4f}, "
-        #         f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
-        #     )
-        #     return amt, 'tp_repull10'
 
         # -- 趋势加多 --
         level = int(trade.get_custom_data('trend_level') or 0)
