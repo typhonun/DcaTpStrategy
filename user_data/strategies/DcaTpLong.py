@@ -47,7 +47,6 @@ class DcaTpLong(IStrategy):
             'bb_added': False, 'pullback_ready': True,
             'reset_needed': False, 'last_trend_side': None,
             'last_fallback_price': None, 'fallback_repull_done': False
-            # 'tp_repull_done': False
         }
         for k, v in flags.items():
             trade.set_custom_data(k, v)
