@@ -143,12 +143,12 @@ class DcaTpLong(IStrategy):
         # -- 止盈回落加仓 --
         last_fb_price = trade.get_custom_data('last_fallback_price')
         repulled = bool(trade.get_custom_data('fallback_repull_done'))
-        # 当价格回升到回撤价的 0.995 倍时加空
-        if last_fb_price and not repulled and price <= last_fb_price * 0.995:
-            amt = 0.20 * margin
+        # 当价格回落到回撤价的 0.995 倍时加空
+        if last_fb_price and not repulled and price <= last_fb_price * 0.995:  # 回落价价格参数
+            amt = 0.20 * margin  # 回落加加仓参数
             trade.set_custom_data('fallback_repull_done', True)
             logger.info(
-                f"{GREEN}[{trade.pair}] 回撤减仓价回落加仓20%: "
+                f"{GREEN}[{trade.pair}] 回撤价回落加仓20%: "
                 f"回撤价={last_fb_price:.4f}, 当前价={price:.4f}, "
                 f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
             )
@@ -282,11 +282,11 @@ class DcaTpLong(IStrategy):
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={buy_amt:.4f} USDT{RESET}"
                 )
             else:
-                # 第一次加仓按 70%
-                buy_amt = 0.70 * margin  # 首次浮盈加仓参数
-                tag = 'rebuy70'
+                # 第一次加仓按 60%
+                buy_amt = 0.60 * margin  # 首次浮盈加仓参数
+                tag = 'rebuy60'
                 logger.info(
-                    f"[{trade.pair}][分批止盈 Step{n + 1} 加仓70%] u={u}, n={n}, "
+                    f"[{trade.pair}][分批止盈 Step{n + 1} 加仓60%] u={u}, n={n}, "
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={buy_amt:.4f}{RESET}"
                 )
             trade.set_custom_data('need_rebuy', False)
@@ -333,16 +333,16 @@ class DcaTpLong(IStrategy):
                 return sell_amt, f"tp_afterDCA_{int(pct * 100)}%"
             else:
                 if not last_tp or Timestamp(last_tp, unit='s').floor('T') != candle_ts:
-                    sell_amt = -0.40 * margin  # 浮盈止盈卖出参数
+                    sell_amt = -0.30 * margin  # 浮盈止盈卖出参数
                     logger.info(
-                        f"[{trade.pair}][浮盈减仓 卖40%→后续加仓70%] u=0, n={n}->{n + 1}, "
+                        f"[{trade.pair}][浮盈减仓 卖30%→后续加仓60%] u=0, n={n}->{n + 1}, "
                         f"{YELLOW}保证金={margin:.2f}{RESET}, {GREEN}减仓={abs(sell_amt):.2f}{RESET}"
                     )
                     trade.set_custom_data('tp_count', n + 1)
                     trade.set_custom_data('dca_count', 0)
                     trade.set_custom_data('dca_done', False)
                     trade.set_custom_data('last_tp_time', int(current_time.timestamp()))
-                    return sell_amt, "tp40"
+                    return sell_amt, "tp30"
 
         # -- 抄底逃顶 --
         if trade.get_custom_data('bottom_added') and price > upper:
@@ -367,6 +367,15 @@ class DcaTpLong(IStrategy):
                 f"保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT{RESET}"
             )
             return amt, 'top_reduce50'
+        # 逃顶后回落至布林中轨，加仓30%
+        if trade.get_custom_data('top_reduced') and price <= mid:
+            trade.set_custom_data('top_reduced', False)
+            amt = 0.3 * margin  # 回落加仓参数
+            logger.info(
+                f"{GREEN}[{trade.pair}] 逃顶回落加仓30%: 当前价={price:.4f}, 布林中轨={mid:.4f}, "
+                f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
+            )
+            return amt, 'rebound_add30'
 
         # -- 24hDCA减仓 --
         u = int(trade.get_custom_data('dca_count') or 0)
@@ -408,7 +417,7 @@ class DcaTpLong(IStrategy):
         return None
 
     def order_filled(self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs) -> None:
-        if getattr(order, 'ft_order_tag', None) == "tp40" and order.side == "sell":
+        if getattr(order, 'ft_order_tag', None) == "tp30" and order.side == "sell":
             trade.set_custom_data('need_rebuy', True)
             trade.set_custom_data('pullback_ready', True)
             trade.set_custom_data('last_tp_price', order.price)
