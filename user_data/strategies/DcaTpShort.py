@@ -45,8 +45,7 @@ class DcaTpShort(IStrategy):
             'top_added': False, 'bottom_reduced': False,
             'bb_added': False, 'pullback_ready_short': True,
             'trend_reset': False, 'last_trend_side': 'none',
-            'last_fallback_price_short': None, 'fallback_repull_done_short': False,
-            # 'tp_repull_done': False
+            'last_fallback_price_short': None, 'fallback_repull_done_short': False
         }
         for k, v in flags.items():
             trade.set_custom_data(k, v)
