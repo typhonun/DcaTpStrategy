@@ -104,7 +104,7 @@ class DcaTpShort(IStrategy):
         # 抄顶入场
         short_cond2 = (
                 (dataframe['close'] > dataframe['bb_upperband']) &
-                (dataframe['rsi'] > 70)
+                (dataframe['rsi'] > 65)
         )
         dataframe['enter_short'] = (short_cond1 | short_cond2).astype(int)
 
@@ -139,7 +139,7 @@ class DcaTpShort(IStrategy):
         # -- 止盈反弹加仓 --
         last_fb = trade.get_custom_data('last_fallback_price_short')
         repulled = bool(trade.get_custom_data('fallback_repull_done_short'))
-        # 当价格反弹到回撤价的 1.005 倍时加空
+        # 当价格反弹到回撤价的 1.005 时加空
         if last_fb and not repulled and price >= last_fb * 1.005:  # 反弹价格参数
             amt = 0.20 * margin  # 反弹加仓参数
             trade.set_custom_data('fallback_repull_done_short', True)
@@ -277,7 +277,7 @@ class DcaTpShort(IStrategy):
                     f"{YELLOW}保证金={margin:.4f}{RESET}, {GREEN}加仓={abs(amt):.4f} USDT{RESET}"
                 )
             else:
-                # 第一次加仓按 70%
+                # 第一次加仓按 60%
                 amt = 0.6 * margin  # 首次浮盈加仓参数
                 tag = 'rebuy60_short'
                 logger.info(
@@ -292,14 +292,12 @@ class DcaTpShort(IStrategy):
         if n > 0 and current_profit < 0.01:
             pct = -min(1.0, 0.20 + 0.05 * n)
             amt = pct * margin
-            # 记录本次回撤后的价格
             trade.set_custom_data('last_fallback_price_short', price)
             trade.set_custom_data('fallback_repull_done_short', False)
             logger.info(
                 f"{YELLOW}[{trade.pair}] 止盈后回撤减仓{int(abs(pct) * 100)}%: "
                 f"回撤价={price:.4f}, 减仓={abs(amt):.4f} USDT{RESET}"
             )
-            # 重置 DCA/TP 计数
             trade.set_custom_data('dca_count', 0)
             trade.set_custom_data('tp_count', 0)
             trade.set_custom_data('dca_done', False)
