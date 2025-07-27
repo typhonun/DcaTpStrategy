@@ -54,7 +54,7 @@ docker-compose run --rm freqtrade download-data --exchange binance --timeframe 3
 # 列出可用数据
 docker-compose run --rm freqtrade list-data --exchange binance
 # 回测数据
-docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m --timerange=20250510-20250701
+docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m
 ```
 
 
