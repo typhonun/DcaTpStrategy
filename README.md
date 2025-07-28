@@ -78,7 +78,7 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓50%。
 
 #### 浮亏 DCA 加仓
 
-基于动态平均入场价，跌破 1−(0.01+dca_count×0.01)（dca_count 浮虧为加仓次数），且 RSI<35，加仓 20%，触发浮亏止盈重置dca_count。
+基于动态平均入场价，跌破 1−(0.01+dca_count×0.01)（dca_count 浮虧为加仓次数），且 RSI<35，加仓 30%，触发浮亏止盈重置dca_count。
 
 #### 浮盈 TP 加仓
 
