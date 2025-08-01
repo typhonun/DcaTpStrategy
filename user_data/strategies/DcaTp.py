@@ -199,7 +199,7 @@ class DcaTp(IStrategy):
                 and current_rate <= ref * 0.99
                 and last['ema9_30'] > last['ema21_30']):
             # 回撤到高点 99% 且 EMA9 仍在 EMA21 之上时，加仓
-            amt = collateral_add(0.02)  # 回撤加仓参数
+            amt = collateral_add(0.02)  # 趋势回撤加仓参数
             trade.set_custom_data('pullback_done', True)
             trade.set_custom_data('pullback_ready', False)
             logger.info(
