@@ -203,7 +203,7 @@ class DcaTpLong(IStrategy):
             trade.set_custom_data('pullback_done', True)
             trade.set_custom_data('pullback_ready', False)
             logger.info(
-                f"{BLUE}[{trade.pair}] 回撤加仓总资金 2%"
+                f"{BLUE}[{trade.pair}] 趋势回撤加仓总资金 2%"
                 f"高点={ref:.4f}, 当前价={current_rate:.4f} "
                 f"保证金={margin:.4f}, 加仓={amt:.4f} USDT{RESET}"
             )
