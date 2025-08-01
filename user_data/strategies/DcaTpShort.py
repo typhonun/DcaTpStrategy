@@ -210,7 +210,7 @@ class DcaTpShort(IStrategy):
             trade.set_custom_data('pullback_done_short', True)
             trade.set_custom_data('pullback_ready_short', False)
             logger.info(
-                f"{RED}[{trade.pair}] 空头回撤加仓总资金 2%"
+                f"{RED}[{trade.pair}] 趋势反弹加仓总资金 2%"
                 f"低点={ref_low:.4f}, 当前价={current_rate:.4f}, "
                 f"保证金={margin:.4f}, 加空={abs(amt):.4f} USDT{RESET}"
             )
