@@ -328,7 +328,7 @@ class DcaTpShort(IStrategy):
                 if not last_tp or Timestamp(last_tp, unit='s').floor('T') != candle_ts:
                     amt = -0.30 * margin  # 浮盈止盈卖出参数
                     logger.info(
-                        f"[{trade.pair}][浮盈减仓 卖30%→后续加仓 6%] u=0, n={n}->{n + 1}, "
+                        f"[{trade.pair}][浮盈减仓 卖30%→后续加仓 5%] u=0, n={n}->{n + 1}, "
                         f"{YELLOW}保证金={margin:.2f}{RESET}, {GREEN}减仓={abs(amt):.2f}{RESET}"
                     )
                     trade.set_custom_data('tp_count', n + 1)
@@ -420,3 +420,4 @@ class DcaTpShort(IStrategy):
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
         return None
+
