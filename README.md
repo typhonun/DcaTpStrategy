@@ -60,7 +60,7 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 ## 介绍
 
-策略是以30m时间周期k线的收盘价为基础计算的，杠杆默认为20X，初始仓位大小为的0.05，根据总资金collateral加仓，仓位大小margin减仓。
+策略是以30m时间周期k线的收盘价为基础计算的，杠杆默认为20X，初始仓位大小为总资金的0.05，根据总资金collateral加仓，仓位大小margin减仓。
 
 #### 趋势/抄底入场
 
