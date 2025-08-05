@@ -282,7 +282,7 @@ class DcaTp(IStrategy):
         last_fb_price = trade.get_custom_data('last_fallback_price')
         ready = bool(trade.get_custom_data('fallback_ready'))
         done = bool(trade.get_custom_data('fallback_repull_done'))
-        # 当价格回落到回撤价的 0.99 时加空
+        # 当价格回落到回撤价的 0.99 时加仓
         if last_fb_price and ready and not done and price <= last_fb_price * 0.99:  # 回落价价格参数
             amt = collateral_add(0.02)  # 回落加加仓参数
             trade.set_custom_data('fallback_repull_done', True)
@@ -406,3 +406,4 @@ class DcaTp(IStrategy):
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
         return None
+
