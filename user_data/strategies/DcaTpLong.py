@@ -147,30 +147,30 @@ class DcaTpLong(IStrategy):
         upper = last['bb_upperband']
         mid = last['bb_midband']
 
-        # # -- 趋势加多 --
-        # level = int(trade.get_custom_data('trend_level') or 0)
-        # reset_needed = bool(trade.get_custom_data('trend_reset'))
-        # # 多头信号
-        # is_bullish_trend = (
-        #         last['macd_30'] > last['macdsig_30'] and
-        #         last['k_30'] > last['d_30'] and
-        #         last['adx_30'] > 25 and
-        #         last['ema9_30'] > last['ema21_30'] > last['ema99_30']
-        # )
-        # if level == 0 and not reset_needed and is_bullish_trend:
-        #     trade.set_custom_data('trend_level', 2)
-        #     trade.set_custom_data('last_trend_side', 'long')
-        #     amt = collateral_add(0.05)  # 趋势加仓参数
-        #     logger.info(f"{GREEN}[{trade.pair}] 多头趋势加仓 5%{RESET} 保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT")
-        #     return amt, 'trend_add50_bull'
-        # # KDJ 衰弱减仓
-        # if level == 2 and last['k_30'] < last['d_30']:
-        #     trade.set_custom_data('trend_level', 0)
-        #     trade.set_custom_data('last_trend_side', 'long')
-        #     amt = -0.4 * margin  # KDJ死叉减仓参数
-        #     logger.info(f"{RED}[{trade.pair}] KDJ 衰弱减仓{RESET} 保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT")
-        #     return amt, 'kdj_reduce40_long'
-        #
+        # -- 趋势加多 --
+        level = int(trade.get_custom_data('trend_level') or 0)
+        reset_needed = bool(trade.get_custom_data('trend_reset'))
+        # 多头信号
+        is_bullish_trend = (
+                last['macd_30'] > last['macdsig_30'] and
+                last['k_30'] > last['d_30'] and
+                last['adx_30'] > 25 and
+                last['ema9_30'] > last['ema21_30'] > last['ema99_30']
+        )
+        if level == 0 and not reset_needed and is_bullish_trend:
+            trade.set_custom_data('trend_level', 2)
+            trade.set_custom_data('last_trend_side', 'long')
+            amt = collateral_add(0.02)  # 趋势加仓参数
+            logger.info(f"{GREEN}[{trade.pair}] 多头趋势加仓 2%{RESET} 保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT")
+            return amt, 'trend_add20_bull'
+        # KDJ 衰弱减仓
+        if level == 2 and last['k_30'] < last['d_30']:
+            trade.set_custom_data('trend_level', 0)
+            trade.set_custom_data('last_trend_side', 'long')
+            amt = -0.4 * margin  # KDJ死叉减仓参数
+            logger.info(f"{RED}[{trade.pair}] KDJ 衰弱减仓{RESET} 保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT")
+            return amt, 'kdj_reduce40_long'
+        
         # # -- 空头信号止损 --
         # last_side = trade.get_custom_data('last_trend_side') or 'none'
         # is_bearish_trend = (
@@ -432,4 +432,5 @@ class DcaTpLong(IStrategy):
             trade.set_custom_data('pullback_ready', True)
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
+
         return None
