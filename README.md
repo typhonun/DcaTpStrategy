@@ -68,7 +68,7 @@ MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时或者布林下轨且rsi<35时�
 
 #### 趋势加仓(可选)
 
-MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时，加仓总资金 5%，KDJ死叉减仓 40%。
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时，加仓总资金 2%，KDJ死叉减仓 40%。
 
 #### 空头信号止损(可选)
 
@@ -84,7 +84,7 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓 50%。
 
 #### 浮盈 TP 加仓
 
-触发浮盈止盈后无回撤 tp_count>=1（tp_count为浮盈加仓次数）加仓总资金 5%，觸發回撤止盈重置tp_count。
+触发浮盈止盈后无回撤 tp_count>=1（tp_count为浮盈加仓次数）加仓总资金 3%，觸發回撤止盈重置tp_count。
 
 #### 分批止盈
 
