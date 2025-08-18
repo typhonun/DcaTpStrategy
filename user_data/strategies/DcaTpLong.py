@@ -296,7 +296,7 @@ class DcaTpLong(IStrategy):
         if last_tp_price and not repull_done and price <= last_tp_price * 0.99:
             amt = collateral_add(0.02)
             trade.set_custom_data('tp_repull_done', True)
-            logger.infoW(
+            logger.info(
                 f"{GREEN}[{trade.pair}] 止盈回落加仓总资金 2%: "
                 f"止盈价={last_tp_price:.4f}, 当前价={price:.4f}, "
                 f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
@@ -434,3 +434,4 @@ class DcaTpLong(IStrategy):
     def custom_stoploss(self, *args, **kwargs) -> float | None:
 
         return None
+
