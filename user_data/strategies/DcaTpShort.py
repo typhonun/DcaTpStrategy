@@ -143,42 +143,42 @@ class DcaTpShort(IStrategy):
         upper = last['bb_upperband']
         mid = last['bb_midband']
 
-        # # -- 趋势加仓 --
-        # level = int(trade.get_custom_data('trend_level') or 0)
-        # reset_needed = bool(trade.get_custom_data('trend_reset'))
-        # vol = last['volume']
-        # vol_ma20 = last['vol_ma20']
-        # atr = last['atr']
-        # atr_ma = last['atr_ma']
-        # # 空头信号
-        # is_bearish_trend = (
-        #         last['macd_30'] < last['macdsig_30'] and
-        #         last['k_30'] < last['d_30'] and
-        #         last['adx_30'] > 25 and
-        #         last['ema9_30'] < last['ema21_30'] < last['ema99_30'] and
-        #         current_profit > 0
-        # )
-        # if level == 0 and not reset_needed and is_bearish_trend:
-        #     trade.set_custom_data('trend_level', 2)
-        #     trade.set_custom_data('last_trend_side', 'short')
-        #     amt = collateral_add(0.05)  # 趋势加仓参数
-        #     logger.info(
-        #         f"{GREEN}[{trade.pair}] 空头趋势加空 5% {RESET}"
-        #         f"保证金={margin:.4f}, 加空={abs(amt):.4f} USDT{RESET}"
-        #     )
-        #     return amt, 'trend_add60_bear'
-        # # KDJ 衰弱减仓
-        # if level == 2 and last['k_30'] > last['d_30']:
-        #     trade.set_custom_data('trend_level', 0)
-        #     trade.set_custom_data('trend_reset', True)
-        #     trade.set_custom_data('last_trend_side', 'short')
-        #     amt = -0.4 * margin  # KDJ死叉减仓参数
-        #     logger.info(
-        #         f"{RED}[{trade.pair}] KDJ 衰弱减仓{RESET}"
-        #         f"保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT{RESET}"
-        #     )
-        #     return amt, 'kdj_reduce40_short'
-        #
+        # -- 趋势加仓 --
+        level = int(trade.get_custom_data('trend_level') or 0)
+        reset_needed = bool(trade.get_custom_data('trend_reset'))
+        vol = last['volume']
+        vol_ma20 = last['vol_ma20']
+        atr = last['atr']
+        atr_ma = last['atr_ma']
+        # 空头信号
+        is_bearish_trend = (
+                last['macd_30'] < last['macdsig_30'] and
+                last['k_30'] < last['d_30'] and
+                last['adx_30'] > 25 and
+                last['ema9_30'] < last['ema21_30'] < last['ema99_30'] and
+                current_profit > 0
+        )
+        if level == 0 and not reset_needed and is_bearish_trend:
+            trade.set_custom_data('trend_level', 2)
+            trade.set_custom_data('last_trend_side', 'short')
+            amt = collateral_add(0.02)  # 趋势加仓参数
+            logger.info(
+                f"{GREEN}[{trade.pair}] 空头趋势加空 2% {RESET}"
+                f"保证金={margin:.4f}, 加空={abs(amt):.4f} USDT{RESET}"
+            )
+            return amt, 'trend_add20_bear'
+        # KDJ 衰弱减仓
+        if level == 2 and last['k_30'] > last['d_30']:
+            trade.set_custom_data('trend_level', 0)
+            trade.set_custom_data('trend_reset', True)
+            trade.set_custom_data('last_trend_side', 'short')
+            amt = -0.4 * margin  # KDJ死叉减仓参数
+            logger.info(
+                f"{RED}[{trade.pair}] KDJ 衰弱减仓{RESET}"
+                f"保证金={margin:.4f}, 减仓={abs(amt):.4f} USDT{RESET}"
+            )
+            return amt, 'kdj_reduce40_short'
+        
         # # -- 多头信号止损 --
         # last_side = trade.get_custom_data('last_trend_side') or 'none'
         # is_bullish_trend = (
@@ -351,16 +351,16 @@ class DcaTpShort(IStrategy):
                 return amt, f"tp_afterDCA_short_u{u}"
             else:
                 if not last_tp or Timestamp(last_tp, unit='s').floor('T') != candle_ts:
-                    amt = -0.40 * margin  # 浮盈止盈卖出参数
+                    amt = -0.30 * margin  # 浮盈止盈卖出参数
                     logger.info(
-                        f"[{trade.pair}][浮盈减仓 卖40%→后续加仓 3%] u=0, n={n}->{n + 1}, "
+                        f"[{trade.pair}][浮盈减仓 卖30%→后续加仓 3%] u=0, n={n}->{n + 1}, "
                         f"{YELLOW}保证金={margin:.2f}{RESET}, {GREEN}减仓={abs(amt):.2f}{RESET}"
                     )
                     trade.set_custom_data('tp_count', n + 1)
                     trade.set_custom_data('dca_count', 0)
                     trade.set_custom_data('dca_done', False)
                     trade.set_custom_data('last_tp_time', int(current_time.timestamp()))
-                    return amt, 'tp40'
+                    return amt, 'tp30'
 
         # -- 抄顶逃底 --
         if trade.get_custom_data('top_added') and price < lower:
@@ -415,7 +415,7 @@ class DcaTpShort(IStrategy):
         #             )
         #             trade.set_custom_data('dca_reduce_done', True)
         #             return amt, 'reduce30%_postDCA_short'
-        #
+        
         # -- 仓位过小加仓 --
         if collateral > 0 and margin < collateral * 0.01:  # 仓位下限
             buy_amt = 1.0 * margin  # 小仓位加仓参数
@@ -437,7 +437,7 @@ class DcaTpShort(IStrategy):
 
     def order_filled(self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs) -> None:
         tag = getattr(order, 'ft_order_tag', None)
-        if tag == "tp40":
+        if tag == "tp30":
             trade.set_custom_data('need_rebuy', True)
             trade.set_custom_data('last_tp_price', order.price)
             trade.set_custom_data('tp_repull_done', False)
@@ -446,3 +446,4 @@ class DcaTpShort(IStrategy):
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
         return None
+
