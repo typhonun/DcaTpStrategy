@@ -73,9 +73,9 @@
       "token": "",
       "chat_id": "",
       "keyboard": [
-        ["/start", "/stop","/forcelong","/forceexit"],
-        ["/status", "/status table","/count","/daily"],
-        ["/profit", "/balance","/performance","/help"]
+        ["/start", "/stop", "/stopentry", "/reload_config"],
+        ["/forcelong", "/forceexit", "/status", "/status table"],
+        ["/daily", "/profit", "/balance","/help"]
      ]
    },
 
