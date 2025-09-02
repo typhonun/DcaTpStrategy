@@ -15,7 +15,7 @@ RESET = "\033[0m"
 logger = logging.getLogger(__name__)
 
 
-class DcaTpLong1(IStrategy):
+class DcaTpLong(IStrategy):
     timeframe = '30m'  # 时间周期
     stoploss = -7
     can_short = False
@@ -503,3 +503,4 @@ class DcaTpLong1(IStrategy):
     def custom_stoploss(self, *args, **kwargs) -> float | None:
 
         return None
+
