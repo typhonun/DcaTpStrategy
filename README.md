@@ -3,7 +3,7 @@
 此项目是基于[freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口）,docker-compose设置端口号（默认为8000，8001和8002）。可以同時運行不同交易对（单向持仓下买入开多和买入平空会冲突）的DcaTpLong和DcaTpShort多空双向机器人，依靠波动获得高低差利润，类似中性网格，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
 
 
-如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考，可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。 leverage：杠杆大小，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
+如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考，可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。 leverage：杠杆大小，max_open_trades：交易对数量上限，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
 优点：
 
