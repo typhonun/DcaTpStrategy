@@ -14,7 +14,7 @@ RESET = "\033[0m"
 logger = logging.getLogger(__name__)
 
 
-class DcaTpShort1(IStrategy):
+class DcaTpShort(IStrategy):
     timeframe = '30m'
     stoploss = -7
     can_short = True
@@ -513,4 +513,5 @@ class DcaTpShort1(IStrategy):
             trade.set_custom_data('pullback_ready_short', True)
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
+
         return None
