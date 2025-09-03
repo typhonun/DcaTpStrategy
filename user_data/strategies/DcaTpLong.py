@@ -324,18 +324,18 @@ class DcaTpLong(IStrategy):
             )
             return amt, 'tp_repull20_fb'
 
-        # -- 浮亏止盈后回落加仓 --
-        last_floating_tp_price = trade.get_custom_data('last_floating_tp_price')
-        floating_done = bool(trade.get_custom_data('floating_tp_repull_done'))
-        if last_floating_tp_price and not floating_done and price <= last_floating_tp_price * 0.99:
-            amt = collateral_add(0.02)
-            trade.set_custom_data('floating_tp_repull_done', True)
-            logger.info(
-                f"{GREEN}[{trade.pair}] 浮亏止盈回落加仓 2%: "
-                f"浮亏止盈价={last_floating_tp_price:.4f}, 当前价={price:.4f}, "
-                f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
-            )
-            return amt, 'floating_tp_repull20'
+        # # -- 浮亏止盈后回落加仓 --
+        # last_floating_tp_price = trade.get_custom_data('last_floating_tp_price')
+        # floating_done = bool(trade.get_custom_data('floating_tp_repull_done'))
+        # if last_floating_tp_price and not floating_done and price <= last_floating_tp_price * 0.99:
+        #     amt = collateral_add(0.02)
+        #     trade.set_custom_data('floating_tp_repull_done', True)
+        #     logger.info(
+        #         f"{GREEN}[{trade.pair}] 浮亏止盈回落加仓 2%: "
+        #         f"浮亏止盈价={last_floating_tp_price:.4f}, 当前价={price:.4f}, "
+        #         f"保证金={margin:.4f}, 加仓={abs(amt):.4f} USDT{RESET}"
+        #     )
+        #     return amt, 'floating_tp_repull20'
 
         # -- 分批止盈 --
         last_tp = trade.get_custom_data('last_tp_time')
@@ -503,4 +503,5 @@ class DcaTpLong(IStrategy):
     def custom_stoploss(self, *args, **kwargs) -> float | None:
 
         return None
+
 
