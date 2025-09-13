@@ -1,59 +1,9 @@
 ## 概述
 
-此项目是基于[freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口）,docker-compose设置端口号（默认为8000，8001和8002）。可以同時運行不同交易对（单向持仓下买入开多和买入平空会冲突）的DcaTpLong和DcaTpShort多空双向机器人，依靠波动获得高低差利润，类似中性网格，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
+此项目是基于[freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口）,docker-compose设置端口号（默认为8000，8001和8002）。可以同時運行不同交易对（单向持仓同一币种买入开多和买入平空会冲突）的DcaTpLong和DcaTpShort多空双向机器人，依靠波动获得高低差利润，类似中性网格，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
 
 
-如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考，可同时持有不同交易对的多空仓位。该版本为开发版，后续将会更新完整的实盘数据。 leverage：杠杆大小，max_open_trades：交易对数量上限，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
-
-优点：
-
-初始资金利用率低，根据总资金进行加仓，风险较小，可以控制仓位大小。
-
-可根据风险偏好调整杠杆，止盈条件和仓位大小。
-
-扩展性高，可优化MACD,KDJ,EMA,RSI指标，加减仓参数和成交逻辑。
-
-缺点：
-
-无固定止损。
-
-无法判断支撑与阻力位。
-
-有滑点，参数过拟合的风险，指标设置不一定最优。
-
-
-
-
-## 安装(以docker为例)
-
-#### 详情参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/docker_quickstart/)
-
-```
-mkdir ft_userdata
-cd ft_userdata/
-# 克隆yml文件
-curl https://raw.githubusercontent.com/freqtrade/freqtrade/stable/docker-compose.yml -o docker-compose.yml
-# 拉取docker镜像
-docker compose pull
-# 启动交易机器人
-docker compose up -d
-# 建立使用者目录
-docker compose run --rm freqtrade create-userdir --userdir user_data
-# 建立config配置
-docker compose run --rm freqtrade new-config --config user_data/config.json
-```
-
-## 使用
-```
-# 查看可下载的时间戳
-docker-compose run --rm freqtrade list-timeframes
-# 下载 OHLCV 数据（以30m为例）
-docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m
-# 列出可用数据
-docker-compose run --rm freqtrade list-data --exchange binance
-# 回测数据
-docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m --timerange=20250510-20250701
-```
+如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考。建议一般不要在机器人运行的时候手动下单，必要的话先 /stopentry，/stop完全停止机器人，再下单，最后/start恢复机器人。该版本为开发版，后续将会更新完整的实盘数据。 leverage：杠杆大小，max_open_trades：交易对数量上限，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
 
 ## 介绍
@@ -83,7 +33,6 @@ MACD、KDJ 死叉、ADX>25、EMA9<EMA21<EMA99时，减仓 50%。
 #### 浮盈 TP 加仓
 
 触发浮盈止盈后无回撤 tp_count>=1（tp_count为浮盈加仓次数）加仓总资金 3%，觸發回撤止盈重置tp_count。
-
 
 #### 浮盈后回撤减仓
 
@@ -128,6 +77,54 @@ DCA 持续 24 小时以上，价格突破布林上轨减仓 30%。
 #### 大仓位减仓(可选)
 
 持仓量大于总资金30%时减仓30%
+
+
+### 优点：
+
+24h自动化交易，初始资金利用率低，根据总资金加仓。
+
+可以根据风险偏好调整杠杆，止盈条件和仓位大小。
+
+扩展性高，可优化和新增MACD,KDJ,EMA,RSI指标，加减仓参数和成交逻辑。
+
+### 缺点：
+
+无固定止损，无法判断支撑与阻力位。
+
+有滑点，参数过拟合的风险，指标设置不一定最优。
+
+
+## 安装(以docker为例)
+
+#### 详情参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/docker_quickstart/)
+
+```
+mkdir ft_userdata
+cd ft_userdata/
+# 克隆yml文件
+curl https://raw.githubusercontent.com/freqtrade/freqtrade/stable/docker-compose.yml -o docker-compose.yml
+# 拉取docker镜像
+docker compose pull
+# 启动交易机器人
+docker compose up -d
+# 建立使用者目录
+docker compose run --rm freqtrade create-userdir --userdir user_data
+# 建立config配置
+docker compose run --rm freqtrade new-config --config user_data/config.json
+```
+
+## 使用
+```
+# 查看可下载的时间戳
+docker-compose run --rm freqtrade list-timeframes
+# 下载 OHLCV 数据（以30m为例）
+docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m
+# 列出可用数据
+docker-compose run --rm freqtrade list-data --exchange binance
+# 回测数据
+docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m --timerange=20250510-20250701
+```
+
 
 
 ## Telegram RPC 
