@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.freqtrade.io/schema.json",
-    "max_open_trades": 2,
+    "max_open_trades": 1,
     "stake_currency": "USDT",
     "stake_amount": 10,
     "tradable_balance_ratio": 0.9,
@@ -53,11 +53,7 @@
         "ccxt_async_config": {},
         "timeout_cancel": 200,
         "pair_whitelist": [
-              "ETH/USDT:USDT",
-              "ADA/USDT:USDT",
-              "SOL/USDT:USDT",
-              "SUI/USDT:USDT",
-              "LINK/USDT:USDT"
+              "ADA/USDT:USDT"
         ],
         "pair_blacklist": [
 
