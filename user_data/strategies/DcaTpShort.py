@@ -601,8 +601,15 @@ class DcaTpShort(IStrategy):
 
     # -- 网格 --
     def grid_single(self, trade: Trade, last: dict, current_time: datetime, current_rate: float,
-                                  margin: float = None):
-        price = last.get('close', None)
+                    margin: float = None):
+        try:
+            price = float(current_rate) if current_rate is not None else None
+        except Exception:
+            price = None
+
+        if price is None:
+            price = last.get('close', None)
+
         if price is None:
             return None
 
@@ -639,16 +646,14 @@ class DcaTpShort(IStrategy):
         if last_grid_ts is not None:
             try:
                 last_dt = datetime.fromtimestamp(int(last_grid_ts))
-                if (current_time - last_dt).total_seconds() < 30 * 60:  # 网格cd
+                if (current_time - last_dt).total_seconds() < 30 * 60:  # 网格 cd
                     logger.debug(f"[{trade.pair}] 网格冷却中（30min），上次动作 ts={last_grid_ts}")
                     return None
             except Exception:
                 pass
 
         w = int(self._get_int(trade, 'grid_w', 0))
-        m = int(self._get_int(trade, 'grid_m', 0))
         max_w = 5  # 加仓上限
-        max_m = 3  # 减仓上限
 
         try:
             lev = float(self.leverage(trade.pair) or 1.0)
@@ -658,33 +663,34 @@ class DcaTpShort(IStrategy):
             lev = 1.0
 
         if price >= grid_upper:
-            if 0 < max_w <= w:
+            if max_w > 0 and w >= max_w:
                 logger.debug(f"[{trade.pair}] 网格加仓达到上限 w={w} >= {max_w}，跳过")
                 return None
 
-            sell_usdt = collateral * 0.02  #
-            if sell_usdt <= 0:
+            add_usdt = collateral * 0.02
+            if add_usdt <= 0:
                 return None
 
-            added_qty = self._qty_from_usdt(sell_usdt, price, lev)
+            added_qty = self._qty_from_usdt(add_usdt, price, lev)
             if added_qty <= 0:
-                logger.debug(f"[{trade.pair}] 计算到的加仓基础数量为0，跳过")
+                logger.debug(f"[{trade.pair}] 计算到的加仓基础数量为0或无效，跳过")
                 return None
 
             try:
                 prev_qty = float(trade.amount)
             except Exception:
                 prev_qty = 0.0
+            prev_base_qty = abs(prev_qty)
+
             prev_avg = self._get_float(trade, 'dynamic_avg_entry', float(trade.open_rate or 0.0)) or float(
                 trade.open_rate or 0.0)
-            prev_cost = prev_qty * prev_avg
+            prev_cost = prev_base_qty * prev_avg
 
             new_avg = prev_avg
-            if (prev_qty + added_qty) > 0:
-                new_avg = (prev_cost + sell_usdt * lev) / (prev_qty + added_qty)
+            if (prev_base_qty + added_qty) > 0:
+                new_avg = (prev_cost + added_qty * price) / (prev_base_qty + added_qty)
 
             new_w = min(w + 1, max_w) if max_w > 0 else w + 1
-            new_m = m - 1
 
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
@@ -695,36 +701,32 @@ class DcaTpShort(IStrategy):
             self._set(trade, 'grid_upper', float(next_sell))
             self._set(trade, 'grid_lower', float(next_buy))
             self._set(trade, 'last_grid_action_time', int(current_time.timestamp()))
-            self._record_add_usdt(trade, 'grid_added_total_usdt', sell_usdt)
+            self._record_add_usdt(trade, 'grid_added_total_usdt', add_usdt)
             self._record_add_qty(trade, 'grid_added_total_qty', added_qty)
             self._set(trade, 'grid_count', int(self._get_int(trade, 'grid_count', 0) + 1))
             self._set(trade, 'grid_w', int(new_w))
-            self._set(trade, 'grid_m', int(new_m))
 
             logger.info(
                 f"[{trade.pair}] {RED}[网格加仓 2%]{RESET}, 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={sell_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}, m={new_m}"
-                f"[{trade.pair}] 下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={add_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}"
+                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
-            return float(sell_usdt), "grid_add_2pct"
+            return float(add_usdt), "grid_sell_2pct"
 
         if price <= grid_lower:
-            if 0 < max_m <= m:
-                logger.debug(f"[{trade.pair}] 网格减仓达到上限 m={m} >= {max_m}，跳过")
-                return None
-
             try:
                 current_qty = float(trade.amount)
             except Exception:
                 current_qty = 0.0
+            current_base_qty = abs(current_qty)
 
-            buy_qty = max(0.0, current_qty * 0.20)
-            if buy_qty <= 0:
-                logger.debug(f"[{trade.pair}] 网格减仓触发，但当前持仓={current_qty:.8f} 无法减仓")
+            buy_back_qty = max(0.0, current_base_qty * 0.20)
+            if buy_back_qty <= 0:
+                logger.debug(f"[{trade.pair}] 网格减仓触发，但当前持仓={current_base_qty:.8f} 无法减仓")
                 return None
 
             try:
-                buy_usdt = (buy_qty * float(current_rate)) / lev if lev and current_rate else 0.0
+                buy_usdt = (buy_back_qty * float(price)) / lev if lev and price else 0.0
             except Exception:
                 buy_usdt = 0.0
 
@@ -732,28 +734,26 @@ class DcaTpShort(IStrategy):
             if buy_usdt <= 0:
                 return None
 
-            new_m = min(m + 1, max_m) if max_m > 0 else m + 1
-            new_w = w - 1
+            new_w = max(0, w - 1)
 
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
 
-            self._record_add_usdt(trade, 'grid_reduced_total_usdt', buy_usdt)
+            self._record_add_usdt(trade, 'grid_reduced_total_usdt', float(buy_usdt))
             self._set(trade, 'grid_anchor_price', float(new_anchor))
             self._set(trade, 'grid_upper', float(next_sell))
             self._set(trade, 'grid_lower', float(next_buy))
             self._set(trade, 'last_grid_action_time', int(current_time.timestamp()))
             self._set(trade, 'grid_count', int(self._get_int(trade, 'grid_count', 0) + 1))
             self._set(trade, 'grid_w', int(new_w))
-            self._set(trade, 'grid_m', int(new_m))
 
             logger.info(
                 f"[{trade.pair}] {RED}[网格减仓 20%]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 减仓={buy_usdt:.4f}, w={new_w}, m={new_m}"
-                f"[{trade.pair}] 下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 减仓={buy_usdt:.4f}, w={new_w}"
+                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
-            return float(-buy_usdt), "grid_sell_20pct"
+            return float(-buy_usdt), "grid_buy_20pct"
         return None
 
     def adjust_trade_position(self, trade: Trade, current_time: datetime, current_rate: float, current_profit: float,
@@ -827,4 +827,3 @@ class DcaTpShort(IStrategy):
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
         return None
-
