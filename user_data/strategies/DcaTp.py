@@ -26,13 +26,13 @@ class DcaTp(IStrategy):
 
     minimal_roi = {"0": 999.0}
     minimal_roi_user_defined = {
-        "300": 0.10, "270": 0.12, "240": 0.14, "210": 0.16,
-        "180": 0.18, "150": 0.20, "120": 0.22, "90": 0.24,
-        "60": 0.26, "30": 0.28, "0": 0.30,
+        "300": 0.05, "270": 0.06, "240": 0.07, "210": 0.08,
+        "180": 0.09, "150": 0.10, "120": 0.11, "90": 0.12,
+        "60": 0.13, "30": 0.14, "0": 0.15,
     }
 
     def leverage(self, pair: str, **kwargs) -> float:
-        return 20
+        return 10
 
     def on_trade_open(self, trade: Trade, **kwargs) -> None:
         flags = {
@@ -594,8 +594,15 @@ class DcaTp(IStrategy):
         return float(sell_amt), "tp30"
 
     def grid_single(self, trade: Trade, last: dict, current_time: datetime, current_rate: float,
-                                  margin: float = None):
-        price = last.get('close', None)
+                    margin: float = None):
+        try:
+            price = float(current_rate) if current_rate is not None else None
+        except Exception:
+            price = None
+
+        if price is None:
+            price = last.get('close', None)
+
         if price is None:
             return None
 
@@ -617,8 +624,8 @@ class DcaTp(IStrategy):
             return None
 
         # 网格阈值
-        grid_lower = anchor * 0.97
-        grid_upper = anchor * 1.03
+        grid_lower = anchor * 0.98
+        grid_upper = anchor * 1.02
 
         collateral = self._collateral_total()
         try:
@@ -632,16 +639,14 @@ class DcaTp(IStrategy):
         if last_grid_ts is not None:
             try:
                 last_dt = datetime.fromtimestamp(int(last_grid_ts))
-                if (current_time - last_dt).total_seconds() < 30 * 60:  # 网格cd
+                if (current_time - last_dt).total_seconds() < 30 * 60:  # 网格cd（30 分钟）
                     logger.debug(f"[{trade.pair}] 网格冷却中（30min），上次动作 ts={last_grid_ts}")
                     return None
             except Exception:
                 pass
 
         w = int(self._get_int(trade, 'grid_w', 0))
-        m = int(self._get_int(trade, 'grid_m', 0))
         max_w = 5  # 加仓上限
-        max_m = 3  # 减仓上限
 
         try:
             lev = float(self.leverage(trade.pair) or 1.0)
@@ -649,11 +654,13 @@ class DcaTp(IStrategy):
                 lev = 1.0
         except Exception:
             lev = 1.0
+        price_source = "market" if current_rate is not None else "candle_close"
 
         if price <= grid_lower:
             if max_w > 0 and w >= max_w:
                 logger.debug(f"[{trade.pair}] 网格加仓达到上限 w={w} >= {max_w}，跳过")
                 return None
+
             pct = 0.02 - 0.002 * float(abs(w))
             buy_usdt = collateral * pct  # 网格加仓
             if buy_usdt <= 0:
@@ -677,11 +684,10 @@ class DcaTp(IStrategy):
                 new_avg = (prev_cost + buy_usdt * lev) / (prev_qty + added_qty)
 
             new_w = min(w + 1, max_w) if max_w > 0 else w + 1
-            new_m = m - 1
 
             new_anchor = float(price)
-            next_buy = new_anchor * 0.97
-            next_sell = new_anchor * 1.03
+            next_buy = new_anchor * 0.98
+            next_sell = new_anchor * 1.02
 
             self._set(trade, 'dynamic_avg_entry', float(new_avg))
             self._set(trade, 'grid_anchor_price', float(new_anchor))
@@ -692,20 +698,15 @@ class DcaTp(IStrategy):
             self._record_add_qty(trade, 'grid_added_total_qty', added_qty)
             self._set(trade, 'grid_count', int(self._get_int(trade, 'grid_count', 0) + 1))
             self._set(trade, 'grid_w', int(new_w))
-            self._set(trade, 'grid_m', int(new_m))
 
             logger.info(
-                f"[{trade.pair}] {RED}[网格加仓 {pct:.2f}]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={buy_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}, m={new_m}{RESET}"
-                f"[{trade.pair}] 下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"[{trade.pair}] {RED}[网格加仓 2%]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={buy_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}{RESET}"
+                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
-            return float(buy_usdt), "grid_add_2pct"
+            return float(buy_usdt), "grid_buy_2pct"
 
         if price >= grid_upper:
-            if max_m > 0 and m >= max_m:
-                logger.debug(f"[{trade.pair}] 网格减仓达到上限 m={m} >= {max_m}，跳过")
-                return None
-
             try:
                 current_qty = float(trade.amount)
             except Exception:
@@ -717,7 +718,8 @@ class DcaTp(IStrategy):
                 return None
 
             try:
-                sell_usdt = (sell_qty * float(current_rate)) / lev if lev and current_rate else 0.0
+                sell_usdt = (sell_qty * float(
+                    current_rate if current_rate is not None else last.get('close'))) / lev if lev else 0.0
             except Exception:
                 sell_usdt = 0.0
 
@@ -725,26 +727,24 @@ class DcaTp(IStrategy):
             if sell_usdt <= 0:
                 return None
 
-            new_m = min(m + 1, max_m) if max_m > 0 else m + 1
-            new_w = w - 1
+            new_w = max(0, w - 1)
 
             new_anchor = float(price)
-            next_buy = new_anchor * 0.97
-            next_sell = new_anchor * 1.03
+            next_buy = new_anchor * 0.98
+            next_sell = new_anchor * 1.02
 
-            self._record_add_usdt(trade, 'grid_reduced_total_usdt', sell_usdt)
+            self._record_add_usdt(trade, 'grid_reduced_total_usdt', float(sell_usdt))
             self._set(trade, 'grid_anchor_price', float(new_anchor))
             self._set(trade, 'grid_upper', float(next_sell))
             self._set(trade, 'grid_lower', float(next_buy))
             self._set(trade, 'last_grid_action_time', int(current_time.timestamp()))
             self._set(trade, 'grid_count', int(self._get_int(trade, 'grid_count', 0) + 1))
             self._set(trade, 'grid_w', int(new_w))
-            self._set(trade, 'grid_m', int(new_m))
 
             logger.info(
-                f"[{trade.pair}] {RED}[网格减仓 20%]{RESET}, 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 卖出={sell_usdt:.4f}, w={new_w}, m={new_m}{RESET}"
-                f"[{trade.pair}] 下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"[{trade.pair}] {RED}[网格减仓 20%]{RESET} (triggered by {price_source}), 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 卖出={sell_usdt:.4f}, w={new_w}{RESET}"
+                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
             return float(-sell_usdt), "grid_sell_20pct"
         return None
@@ -820,4 +820,3 @@ class DcaTp(IStrategy):
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
         return None
-
