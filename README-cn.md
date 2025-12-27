@@ -1,6 +1,6 @@
 ## 概述
 
-此项目是基于[freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口），docker-compose设置端口号（默认为8000，8001和8002）。可以同時运行不同交易对（单向持仓下同一币种买入开多和买入平空会冲突）的DcaTpLong和DcaTpShort多空双向机器人，依靠波动获得高低差利润，类似中性网格，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
+此项目是基于[Freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口），docker-compose设置端口号（默认为8000，8001和8002）。可以同時运行不同交易对（单向持仓下同一币种买入开多和买入平空会冲突）的DcaTpLong和DcaTpShort多空双向机器人，依靠波动获得高低差利润，类似中性网格，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
 
 
 如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考。若要手动下单请先 /stopentry，/stop完全停止机器人之后再下单，最后/start恢复机器人。 leverage：杠杆大小，max_open_trades：交易对数量上限，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
@@ -110,3 +110,4 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 该策略为开发版本，仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
 
 #### 不足和待完善之处请谅解！源码仅供学习建议
+
