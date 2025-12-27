@@ -253,6 +253,7 @@ class DcaTpLong(IStrategy):
     def trend_add(self, trade: Trade, last: dict, margin: float, collateral: float, current_time: datetime):
         level = self._get_int(trade, 'trend_level', 0)
         reset_needed = self._get_bool(trade, 'reset_needed', False)
+        u = self._get_int(trade, 'dca_count', 0)
 
         is_bullish_trend = (
                 last.get('macd_30', 0) > last.get('macdsig_30', 0) and
@@ -265,8 +266,8 @@ class DcaTpLong(IStrategy):
         def _add_trend_total_usdt(x):
             self._record_add_usdt(trade, 'trend_total_added_usdt', x)
 
-        if level == 0 and (not reset_needed) and price is not None and is_bullish_trend:
-            self._set(trade, 'trend_level', 2)
+        if level == 0 and u == 0 and (not reset_needed) and price is not None and is_bullish_trend:
+            self._set(trade, 'trend_level', 1)
             self._set(trade, 'kdj_reduced', False)
             amt = collateral * 0.02  # 趋势加仓
             _add_trend_total_usdt(abs(amt))
@@ -280,7 +281,7 @@ class DcaTpLong(IStrategy):
                         f"加仓={abs(amt):.4f} USDT, 新均价={avg_price:.4f}")
             return float(amt), 'trend_add20_bull'
 
-        if level == 2:
+        if level == 1:
             kdj_reduced = self._get_bool(trade, 'kdj_reduced', False)
             if (not kdj_reduced) and last.get('k_30', 0) < last.get('d_30', 0):
                 total_trend_usdt = self._get_float(trade, 'trend_total_added_usdt', 0.0) or 0.0
@@ -420,7 +421,7 @@ class DcaTpLong(IStrategy):
         return float(buy_amt), 'rebuy_merged'
 
     def fallback_reduce(self, trade: Trade, last: dict, current_profit: float, margin: float,
-                                current_rate: float, current_time: datetime):
+                        current_rate: float, current_time: datetime):
         n = self._get_int(trade, 'tp_count', 0)
         if not (n > 0 and current_profit < 0.01):  # 回撤阈值
             return None
@@ -669,7 +670,14 @@ class DcaTpLong(IStrategy):
                 logger.debug(f"[{trade.pair}] 网格加仓达到上限 w={w} >= {max_w}，跳过")
                 return None
 
-            buy_usdt = collateral * 0.02  # 网格加仓
+            u = self._get_int(trade, 'dca_count', 0)
+            if u >= 1:
+                grid_buy_frac = 0.01  # 网格加仓
+                buy_usdt = collateral * grid_buy_frac
+            else:
+                grid_buy_frac = 0.02
+                buy_usdt = collateral * grid_buy_frac
+
             if buy_usdt <= 0:
                 return None
 
@@ -691,7 +699,6 @@ class DcaTpLong(IStrategy):
                 new_avg = (prev_cost + buy_usdt * lev) / (prev_qty + added_qty)
 
             new_w = min(w + 1, max_w) if max_w > 0 else w + 1
-
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
@@ -707,11 +714,12 @@ class DcaTpLong(IStrategy):
             self._set(trade, 'grid_w', int(new_w))
 
             logger.info(
-                f"[{trade.pair}] {RED}[网格加仓 2%]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={buy_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}{RESET}"
+                f"[{trade.pair}] {RED}[网格加仓 {int(grid_buy_frac * 100)}%]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={buy_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}{RESET}, "
                 f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
-            return float(buy_usdt), "grid_buy_2pct"
+            tag = "grid_buy_1pct" if grid_buy_frac == 0.01 else "grid_buy_2pct"
+            return float(buy_usdt), tag
 
         if price >= grid_upper:
             try:
@@ -735,7 +743,6 @@ class DcaTpLong(IStrategy):
                 return None
 
             new_w = max(0, w - 1)
-
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
@@ -750,7 +757,7 @@ class DcaTpLong(IStrategy):
 
             logger.info(
                 f"[{trade.pair}] {RED}[网格减仓 20%]{RESET} (triggered by {price_source}), 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 卖出={sell_usdt:.4f}, w={new_w}{RESET}"
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 卖出={sell_usdt:.4f}, w={new_w}{RESET}, "
                 f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
             )
             return float(-sell_usdt), "grid_sell_20pct"
@@ -822,7 +829,7 @@ class DcaTpLong(IStrategy):
     def order_filled(self, pair: str, trade: Trade, order: Order, current_time: datetime, **kwargs) -> None:
         tag = getattr(order, 'ft_order_tag', '') or ''
 
-        if tag in "tp30"and order.side == "sell":
+        if tag in "tp30" and order.side == "sell":
             self._set(trade, 'need_rebuy', True)
 
     def custom_stoploss(self, *args, **kwargs) -> float | None:
