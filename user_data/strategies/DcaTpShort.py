@@ -253,6 +253,7 @@ class DcaTpShort(IStrategy):
     def trend_add(self, trade: Trade, last: dict, margin: float, collateral: float, current_time: datetime):
         level = self._get_int(trade, 'trend_level', 0)
         reset_needed = self._get_bool(trade, 'reset_needed', False)
+        u = self._get_int(trade, 'dca_count', 0)
 
         is_bearish_trend = (
                 last.get('macd_30', 0) < last.get('macdsig_30', 0) and
@@ -265,8 +266,8 @@ class DcaTpShort(IStrategy):
         def _add_trend_total_usdt(x):
             self._record_add_usdt(trade, 'trend_total_added_usdt', x)
 
-        if level == 0 and (not reset_needed) and price is not None and is_bearish_trend:
-            self._set(trade, 'trend_level', 2)
+        if level == 0 and u == 0 and (not reset_needed) and price is not None and is_bearish_trend:
+            self._set(trade, 'trend_level', 1)
             self._set(trade, 'kdj_reduced', False)
             sell_amt = collateral * 0.02  # 趋势加仓
             _add_trend_total_usdt(abs(sell_amt))
@@ -280,7 +281,7 @@ class DcaTpShort(IStrategy):
                         f"加仓={abs(sell_amt):.4f} USDT, 新均价={avg_price:.4f}")
             return float(sell_amt), 'trend_add20_bear'
 
-        if level == 2:
+        if level == 1:
             kdj_reduced = self._get_bool(trade, 'kdj_reduced', False)
             if (not kdj_reduced) and last.get('k_30', 0) > last.get('d_30', 0):
                 total_trend_usdt = self._get_float(trade, 'trend_total_added_usdt', 0.0) or 0.0
@@ -419,7 +420,7 @@ class DcaTpShort(IStrategy):
         return float(sell_amt), 'resell_merged'
 
     def fallback_reduce(self, trade: Trade, last: dict, current_profit: float, margin: float,
-                                current_rate: float, current_time: datetime):
+                        current_rate: float, current_time: datetime):
         n = self._get_int(trade, 'tp_count', 0)
         if not (n > 0 and current_profit < 0.01):  # 回撤阈值
             return None
@@ -484,7 +485,8 @@ class DcaTpShort(IStrategy):
             sell_usdt_capped = min(buy_usdt, max(0.0, collateral))
 
             if sell_usdt_capped <= 0:
-                logger.debug(f"[{trade.pair}] 回撤再加仓: buy_usdt_capped={sell_usdt_capped:.4f} 无效或无可用余额, 跳过")
+                logger.debug(
+                    f"[{trade.pair}] 回撤再加仓: buy_usdt_capped={sell_usdt_capped:.4f} 无效或无可用余额, 跳过")
                 return None
             added_qty = self._qty_from_usdt(sell_usdt_capped, price, lev)
 
@@ -667,7 +669,14 @@ class DcaTpShort(IStrategy):
                 logger.debug(f"[{trade.pair}] 网格加仓达到上限 w={w} >= {max_w}，跳过")
                 return None
 
-            add_usdt = collateral * 0.02
+            u = self._get_int(trade, 'dca_count', 0)
+            if u >= 1:
+                grid_sell_frac = 0.01  # 网格加仓
+                add_usdt = collateral * grid_sell_frac
+            else:
+                grid_sell_frac = 0.02
+                add_usdt = collateral * grid_sell_frac
+
             if add_usdt <= 0:
                 return None
 
@@ -691,7 +700,6 @@ class DcaTpShort(IStrategy):
                 new_avg = (prev_cost + added_qty * price) / (prev_base_qty + added_qty)
 
             new_w = min(w + 1, max_w) if max_w > 0 else w + 1
-
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
@@ -707,11 +715,12 @@ class DcaTpShort(IStrategy):
             self._set(trade, 'grid_w', int(new_w))
 
             logger.info(
-                f"[{trade.pair}] {RED}[网格加仓 2%]{RESET}, 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={add_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}"
-                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"[{trade.pair}] {RED}[网格加仓 {int(grid_sell_frac * 100)}%]{RESET}, 当前价={price:.4f}, 触发价={grid_upper:.4f}, "
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 加仓={add_usdt:.4f} USDT, 新均价={new_avg:.4f}, w={new_w}, "
+                f"下次网格 减仓价={next_buy:.4f}, 加仓价={next_sell:.4f}"
             )
-            return float(add_usdt), "grid_sell_2pct"
+            tag = "grid_sell_1pct" if grid_sell_frac == 0.01 else "grid_sell_2pct"
+            return float(add_usdt), tag
 
         if price <= grid_lower:
             try:
@@ -735,7 +744,6 @@ class DcaTpShort(IStrategy):
                 return None
 
             new_w = max(0, w - 1)
-
             new_anchor = float(price)
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
@@ -750,8 +758,8 @@ class DcaTpShort(IStrategy):
 
             logger.info(
                 f"[{trade.pair}] {RED}[网格减仓 20%]{RESET}, 当前价={price:.4f}, 触发价={grid_lower:.4f}, "
-                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 减仓={buy_usdt:.4f}, w={new_w}"
-                f"下次网格 买价={next_buy:.4f}, 卖价={next_sell:.4f}"
+                f"{YELLOW}保证金={cur_margin:.2f}{RESET}, 减仓={buy_usdt:.4f}, w={new_w}, "
+                f"下次网格 减仓价={next_buy:.4f}, 加仓价={next_sell:.4f}"
             )
             return float(-buy_usdt), "grid_buy_20pct"
         return None
