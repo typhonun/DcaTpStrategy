@@ -116,18 +116,11 @@ class DcaTp(IStrategy):
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        long_cond1 = (
-                (dataframe['macd_30'] > dataframe['macdsig_30']) &
-                (dataframe['k_30'] > dataframe['d_30']) &
-                (dataframe['adx_30'] > 25) &
-                (dataframe['ema9_30'] > dataframe['ema21_30']) &
-                (dataframe['ema21_30'] > dataframe['ema99_30'])
-        )
-        long_cond2 = (
+        long_cond = (
                 (dataframe['close'] < dataframe['bb_lowerband']) &
                 (dataframe['rsi'] < 35)
         )
-        dataframe['enter_long'] = (long_cond1 | long_cond2).astype(int)
+        dataframe['enter_long'] = long_cond.astype(int)
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
