@@ -1,9 +1,11 @@
 ## Overview
 
+[![GitHub stars](https://img.shields.io/github/stars/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/network/members)
 
 [中文版本](./README-cn.md)
 
-This project is a quantitative trading strategy developed based on the [freqtrade](https://www.freqtrade.io/en/stable/) framework. The default configuration includes three trading bots (to add bots, please log in to the host port in the listening port API URL). The port numbers are set in docker-compose (defaults are 8000, 8001, and 8002). It can run DcaTpLong and DcaTpShort long/short bots simultaneously on different trading pairs (buying long and closing short positions on the same currency pair will conflict under a one-way position). It profits from the price difference based on volatility, similar to a neutral grid. Alternatively, you can run only the DcaTp long bot (parameters have been optimized for DcaTpLong to reduce drawdown risk).
+This project is a quantitative trading strategy developed based on the [Freqtrade](https://www.freqtrade.io/en/stable/) framework. The default configuration includes three trading bots (to add bots, please log in to the host port in the listening port API URL). The port numbers are set in docker-compose (defaults are 8000, 8001, and 8002). It can run DcaTpLong and DcaTpShort long/short bots simultaneously on different trading pairs (buying long and closing short positions on the same currency pair will conflict under a one-way position). It profits from the price difference based on volatility, similar to a neutral grid. Alternatively, you can run only the DcaTp bot (parameters have been optimized for DcaTpLong to reduce drawdown risk).
 
 To use this project, please copy DcaTpLong to the strategies directory. The config file is provided for reference. To place orders manually, first use `/stopentry` and then `/stop` to completely stop the bot before placing an order, and finally `/start` to resume the bot. Leverage: Leverage level, max_open_trades: Maximum number of trading pairs, stake_amount: Initial capital, tradeable_balance_ratio: Capital utilization rate, pair_whitelist: Whitelist of trading pairs.
 
@@ -122,4 +124,5 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 This strategy is a development version and is for reference only. Do not risk your money. You assume all risks associated with using this strategy. It is strongly recommended to run the trading robot in Dry-run first and not invest any funds until you understand how it works and what profits/losses you should expect.
 
 #### Please forgive any shortcomings and areas for improvement! The source code is for learning and suggestion only.
+
 
