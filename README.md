@@ -115,14 +115,15 @@ docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance -
 
 - `/forcelong`: Open a long position immediately
 
-`/forceshort`: Open a short position immediately
+- `/forceshort`: Open a short position immediately
 
-`/forceexit`: Exit immediately
+- `/forceexit`: Exit immediately
 
 ## Disclaimer
 
 This strategy is a development version and is for reference only. Do not risk your money. You assume all risks associated with using this strategy. It is strongly recommended to run the trading robot in Dry-run first and not invest any funds until you understand how it works and what profits/losses you should expect.
 
 #### Please forgive any shortcomings and areas for improvement! The source code is for learning and suggestion only.
+
 
 
