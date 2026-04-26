@@ -638,7 +638,7 @@ class DcaTpShort(IStrategy):
 
             new_m = min(m + 1, max_m) if max_m > 0 else m + 1
             new_anchor = float(price)
-            # 下次网格加仓价
+            # 下次网格价格
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
 
@@ -670,7 +670,6 @@ class DcaTpShort(IStrategy):
 
             new_m = max(0, m - 1)
             new_anchor = float(price)
-            # 下次网格加仓价
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
 
