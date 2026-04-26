@@ -1,129 +1,113 @@
-## Overview
+## 概述
 
 [![GitHub stars](https://img.shields.io/github/stars/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/network/members)
 
 [中文版本](./README-cn.md)
 
-This project is a quantitative trading strategy developed based on the [Freqtrade](https://www.freqtrade.io/en/stable/) framework. The default configuration includes three trading bots (to add bots, please log in to the host port in the listening port API URL). The port numbers are set in docker-compose (defaults are 8000, 8001, and 8002). It can run DcaTpLong and DcaTpShort long/short bots simultaneously on different trading pairs (buying long and closing short positions on the same currency pair will conflict under a one-way position). It profits from the price difference based on volatility, similar to a neutral grid. Alternatively, you can run only the DcaTp bot (parameters have been optimized for DcaTpLong to reduce drawdown risk).
+此项目是基于[Freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口），docker-compose设置端口号（默认为8000，8001和8002）。由于策略限制为单向持仓，同一币种开多和平空会冲突，可以同時运行DcaTpLong和DcaTpShort不同交易对的多空双向机器人，依靠波动获得高低差利润，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
 
-To use this project, please copy DcaTpLong to the strategies directory. The config file is provided for reference. To place orders manually, first use `/stopentry` and then `/stop` to completely stop the bot before placing an order, and finally `/start` to resume the bot. Leverage: Leverage level, max_open_trades: Maximum number of trading pairs, stake_amount: Initial capital, tradeable_balance_ratio: Capital utilization rate, pair_whitelist: Whitelist of trading pairs.
 
-## Introduction
+如果要使用，请将DcaTpLong复制到strategies目录下，config配置可供参考。leverage：杠杆大小，max_open_trades：交易对数量上限，stake_amount：初始资金，tradable_balance_ratio：资金占用率，pair_whitelist：交易对白名单。
 
-The strategy is calculated based on the closing price of the 30-minute candlestick chart. The default leverage is 20X. The initial position size is 5% of the total capital. Positions are added collaterally based on the total capital, and reduced by margin.
 
-#### Trend/Bottom-Fishing Entry
+## 介绍
 
-Entry occurs when MACD and KDJ form a golden cross, ADX > 25, EMA9 > EMA21 > EMA99, or when the lower Bollinger Band is reached and RSI < 35.
+策略是以30m时间周期k线的收盘价为基础计算的，杠杆默认为10X，初始仓位大小为总资金的5%，根据总资金collateral和仓位大小margin调整仓位。
 
-#### Trend-Based Position Addition
+#### 趋势/抄底入场
 
-Add to the position by 2% of the total capital when MACD and KDJ form a golden cross, ADX > 25, EMA9 > EMA21 > EMA99. Subtract the amount added when KDJ forms a death cross.
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时或者布林下轨且rsi<35时入场。
 
-#### Adding to Position During Unrealized Losses (DCA)
+#### 趋势加仓
 
-Based on the dynamic average entry price, if the price falls to 1 − (0.01 + dca_count × 0.02), and KDJ_J < 0 or RSI < 20, or both KDJ_J < 20 and RSI < 35, add 2% of the total capital, increment dca_count by 1, up to a maximum of 5 times, with a 60-minute cooldown.
+MACD、KDJ 金叉、ADX>25、EMA9>EMA21>EMA99时，加仓总资金 2%，KDJ死叉时减仓总资金 2%。
 
-#### Adding to Position During Unrealized Profits (TP)
+#### 浮亏 DCA 加仓
 
-After triggering a profit-taking stop-loss, add 5% of the total capital, increment tp_count by 1.
+基于动态平持仓均价，跌至 1−(0.01-DCA加仓次数×0.02)，且 KDJ_J< 0或RSI< 20或KDJ_J< 20和RSI< 35，加仓量为（2%-0.2%*DCA加仓次数），上限7次，冷却时间60m.
 
-#### Reducing Position After Profit-Taking on Drawdown
+#### 浮盈 TP 加仓
 
-If there is already TP (tp_count > 0), and the unrealized profit is < 1%, reduce the position to 5% of the total capital, and tp_count = 0.
+触发浮盈止盈后加仓至总资金的 5%，加仓量为（总资金的 5% -仓位大小）。
 
-#### Taking Profit in Batches
+#### 分批止盈
 
-If DCA (dca_count > 0) has been triggered, reduce the position to 5% of the total capital when taking profit, and dca_count = 0.
+已触发浮亏DCA后，止盈时减至总资金 5%。
 
-If TP (Take Profit) is not triggered, reduce position by 30% upon taking profit, and mark for potential additional profit.
+触发TP止盈时减仓 30%，标记可浮盈加仓。
 
-#### Grid Trading
-The initial buy order is at 0.98 of the average holding price, subsequent buy orders are at 0.98 of the transaction price, adding 2% of total capital. If DCA (Distributed Calibration) is triggered, only 1% is added, up to a maximum of 5 times, with a 30-minute cooldown.
-The sell order price is 1.02 of the transaction price, reducing position by 20%.
+#### 网格
+首次网格买单价为持仓均价的 0.98，后续买单价为成交价的 0.98，加仓量为（2%-0.2%*网格加仓次数），上限 5次，冷却时间30m；
+卖单价为成交价的 1.02，减仓总资金的 2%。
 
-### Advantages:
 
-24-hour automated trading, combining some logic from grid trading and dollar-cost averaging.
+### 优点：
 
-Low initial capital requirement, adding positions based on total capital, with a maximum position size of approximately 25%.
+24h自动化交易，结合了网格和DCA策略的部分逻辑。
 
-Leverage, take-profit conditions, and position size can be adjusted according to risk appetite.
+初始资金占用率 5%，杠杆 10X，自动复利计算。
 
-MACD, KDJ, EMA, and RSI indicators can be optimized, and position addition/reduction parameters can be modified.
+可以根据风险偏好调整杠杆，止盈条件和仓位大小。
 
-### Disadvantages:
+可优化MACD，KDJ，EMA，RSI指标，修改加减仓参数。
 
-No fixed stop-loss, unable to determine support and resistance levels.
+### 缺点：
 
-Risk of slippage, parameter overfitting, and indicator settings may not be optimal. Frequent trading may result in higher transaction fees. ## Installation (using Docker as an example)
+无固定止损，极端行情累积加仓，持仓量会达到总资金的 25%左右。
 
-#### For details, refer to the [freqtrade official documentation](https://www.freqtrade.io/en/stable/docker_quickstart/)
+有滑点，参数过拟合的风险，指标设置不一定最优。
+
+频繁交易可能产生较高的手续费。
+
+
+## 安装(以docker为例)
+
+#### 详情参考[freqtrade官方文档](https://www.freqtrade.io/en/stable/docker_quickstart/)
 
 ```
 mkdir ft_userdata
 cd ft_userdata/
-
-# Clone the yml file
+# 克隆yml文件
 curl https://raw.githubusercontent.com/freqtrade/freqtrade/stable/docker-compose.yml -o docker-compose.yml
-
-# Pull the Docker image
+# 拉取docker镜像
 docker compose pull
-
-# Start the trading bot
+# 启动交易机器人
 docker compose up -d
-
-# Create the user directory
+# 建立使用者目录
 docker compose run --rm freqtrade create-userdir --userdir user_data
-
-# Create the config
+# 建立config配置
 docker compose run --rm freqtrade new-config --config user_data/config.json
-
 ```
 
-## Usage
+## 使用
 ```
-# View downloadable timestamps
+# 查看可下载的时间戳
 docker-compose run --rm freqtrade list-timeframes
-
-# Download OHLCV Data (30m example)
-
+# 下载 OHLCV 数据（以30m为例）
 docker-compose run --rm freqtrade download-data --exchange binance --timeframe 30m
-
-# List available data
-
+# 列出可用数据
 docker-compose run --rm freqtrade list-data --exchange binance
-
-# Backtest data
-
+# 回测数据
 docker-compose run --rm freqtrade backtesting --datadir user_data/data/binance --export trades --stake-amount 10 -s DcaTpLong -i 30m --timerange=20250510-20250701
-
 ```
 
-## Telegram RPC
 
-#### For more commands, please refer to [file](https://www.freqtrade.io/en/latest/telegram-usage/)
+## Telegram RPC 
 
-- `/start`: Start a trade
+#### 更多指令请参阅[文件](https://www.freqtrade.io/en/latest/telegram-usage/)
 
-- `/stop`: Stop a trade
-
-- `/stopentry`: Stop a new trade
-
-- `/reload_config`: Load the configuration
-
-- `/forcelong`: Open a long position immediately
-
-- `/forceshort`: Open a short position immediately
-
-- `/forceexit`: Exit immediately
-
-## Disclaimer
-
-This strategy is a development version and is for reference only. Do not risk your money. You assume all risks associated with using this strategy. It is strongly recommended to run the trading robot in Dry-run first and not invest any funds until you understand how it works and what profits/losses you should expect.
-
-#### Please forgive any shortcomings and areas for improvement! The source code is for learning and suggestion only.
+- `/start`: 启动交易
+- `/stop`: 关闭交易
+- `/stopentry`: 停止新的交易
+- `/reload_config`: 加载config配置
+- `/forcelong`: 立即开多
+- `/forceshort`: 立即开空
+- `/forceexit`: 立即退出
 
 
+## 免责声明
 
+该策略为开发版本，仅供参考用途，勿将担心损失的资金用于冒险，使用本策略的风险由您自行承担。强烈建议先在 Dry-run 中运行交易机器人，在了解其工作原理以及您应该预期的利润/损失之前，不要投入资金。
+
+#### 不足和待完善之处请谅解！源码仅供学习建议
