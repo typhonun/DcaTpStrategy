@@ -627,7 +627,7 @@ class DcaTpLong(IStrategy):
 
             new_w = min(w + 1, max_w) if max_w > 0 else w + 1
             new_anchor = float(price)
-            # 下次网格加仓价格
+            # 下次网格价格
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
 
@@ -659,8 +659,6 @@ class DcaTpLong(IStrategy):
 
             new_w = max(0, w - 1)
             new_anchor = float(price)
-
-            # 下次网格价格
             next_buy = new_anchor * 0.98
             next_sell = new_anchor * 1.02
 
