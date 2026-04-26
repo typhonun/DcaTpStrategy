@@ -3,7 +3,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/typhonun/DcaTpStrategy.svg?style=social)](https://github.com/typhonun/DcaTpStrategy/network/members)
 
-[中文版本](./README-cn.md)
+[英文版本](./README-en.md)
 
 此项目是基于[Freqtrade](https://www.freqtrade.io/en/stable/)框架研发的量化交易策略，配置默认有三個个交易机器人（添加机器人请在监听端口API Url中登录主机端口），docker-compose设置端口号（默认为8000，8001和8002）。由于策略限制为单向持仓，同一币种开多和平空会冲突，可以同時运行DcaTpLong和DcaTpShort不同交易对的多空双向机器人，依靠波动获得高低差利润，也可以只运行DcaTp做多机器人(根据DcaTpLong优化了参数以减小回撤风险)。
 
