@@ -713,7 +713,7 @@ class DcaTpShort(IStrategy):
         df30, _ = self.dp.get_analyzed_dataframe(trade.pair, '30m')
         if df30.empty:
             return None
-        last30_ts = pd.Timestamp(df30.index[-1]).tz_localize(None).floor('T')
+        last30_ts = pd.Timestamp(df30.index[-1]).tz_localize(None).floor('min')
         if candle_ts != last30_ts:
             return None
 
